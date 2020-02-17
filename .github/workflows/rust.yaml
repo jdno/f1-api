@@ -1,0 +1,30 @@
+name: rust
+
+on: [push]
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Lint Rust files
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: [stable, 1.39.0]
+
+    steps:
+      - uses: hecrj/setup-rust-action@v1
+        with:
+          rust-version: ${{ matrix.rust }}
+
+      - uses: actions/checkout@v2
+
+      - name: cargo test
+        run: cargo test --verbose
