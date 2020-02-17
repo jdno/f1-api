@@ -1,0 +1,11 @@
+[package]
+name = "f1-api"
+version = "0.0.0"
+edition = "2018"
+
+authors = ["Jan David <jandavid@6a64.com>"]
+license = "MIT OR Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
