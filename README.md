@@ -6,6 +6,16 @@ This project implements a client library for the telemetry data that is
 published by the current generation of [F1 video games][f1] by [Codemasters].
 The library is written in Rust, using [tokio] for async networking.
 
+## Examples
+
+The `examples` folder contains examples that show how to use this library. They
+can also be helpful for local development, in particular the `cli` example. It
+uses the library to listen to telemetry packages from an F1 game, and prints
+them on the terminal. More information how to use the CLI can be gathered from
+the following command:
+
+    cargo run --example cli -- --help
+
 ## License
 
 Licensed under either of
