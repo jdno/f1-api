@@ -1,0 +1,40 @@
+name: lint
+
+on: [push]
+
+jobs:
+  markdown:
+    name: Markdown
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install markdownlint
+        run: sudo npm install -g markdownlint-cli
+
+      - name: Lint Markdown files
+        run: markdownlint '**/*.md'
+
+  rustfmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Format Rust files
+        run: cargo fmt --all -- --check
+
+  yaml:
+    name: YAML
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install yamllint
+        run: sudo apt-get install yamllint
+
+      - name: Lint YAML files
+        run: yamllint .
