@@ -1,4 +1,4 @@
-use crate::nineteen::{Flag, PacketHeader};
+use crate::nineteen::{Flag, PacketHeader, VehicleIndex};
 
 pub enum Formula {
     ModernF1 = 0,
@@ -120,7 +120,7 @@ pub struct SessionPacket {
     is_spectating: bool,
 
     /// Index of the car being spectated.
-    spectator_car_index: u8,
+    spectator_car_index: VehicleIndex,
 
     /// Whether the support for SLI Pro is active.
     sli_pro_support: bool,
