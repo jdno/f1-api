@@ -55,5 +55,9 @@ pub struct PacketHeader {
 
     /// The setups and status of cars are published as arrays. This field
     /// indicates which position in these arrays the player's car has.
-    pub player_car_index: u8,
+    pub player_car_index: VehicleIndex,
 }
+
+/// Data for all vehicles is provided as an array. References to the data in
+/// this array are made in the form of a vehicle index.
+pub type VehicleIndex = u8;
