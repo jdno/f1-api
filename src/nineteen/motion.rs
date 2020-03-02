@@ -1,4 +1,7 @@
 use crate::nineteen::PacketHeader;
+use crate::packet::FromBytes;
+use bytes::{Buf, BytesMut};
+use std::io::{Cursor, Error};
 
 pub struct CarMotion {
     /// The position in the world on the X, Y, and Z axis.
@@ -62,4 +65,102 @@ pub struct MotionPacket {
 
     /// Current angle of the front wheels in radians.
     front_wheels_angle: f32,
+}
+
+impl FromBytes for MotionPacket {
+    fn buffer_size() -> usize {
+        1343
+    }
+
+    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    where
+        Self: Sized,
+    {
+        let header = PacketHeader::decode(cursor)?;
+        let mut cars = Vec::with_capacity(20);
+
+        for _ in 0..20 {
+            cars.push(CarMotion {
+                world_position: (
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                ),
+                world_velocity: (
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                ),
+                world_forward_direction: (
+                    cursor.get_i16_le(),
+                    cursor.get_i16_le(),
+                    cursor.get_i16_le(),
+                ),
+                world_right_direction: (
+                    cursor.get_i16_le(),
+                    cursor.get_i16_le(),
+                    cursor.get_i16_le(),
+                ),
+                gforce: (
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                ),
+                yaw: cursor.get_f32_le(),
+                pitch: cursor.get_f32_le(),
+                roll: cursor.get_f32_le(),
+            })
+        }
+
+        Ok(MotionPacket {
+            header,
+            cars,
+            suspension_positions: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            suspension_velocity: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            suspension_acceleration: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            wheel_speed: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            wheel_slip: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            local_velocity: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            angular_velocity: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            angular_acceleration: (
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+                cursor.get_f32_le(),
+            ),
+            front_wheels_angle: cursor.get_f32_le(),
+        })
+    }
 }
