@@ -1,4 +1,8 @@
 use crate::nineteen::PacketHeader;
+use crate::packet::FromBytes;
+use bytes::{Buf, BytesMut};
+use std::convert::TryFrom;
+use std::io::{Cursor, Error, ErrorKind};
 
 pub enum DriverStatus {
     InGarage = 0,
@@ -91,4 +95,112 @@ pub struct LapPacket {
 
     /// Lap data for all cars on track.
     pub laps: Vec<Lap>,
+}
+
+impl TryFrom<u8> for DriverStatus {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(DriverStatus::InGarage),
+            1 => Ok(DriverStatus::FlyingLap),
+            2 => Ok(DriverStatus::InLap),
+            3 => Ok(DriverStatus::OutLap),
+            4 => Ok(DriverStatus::OnTrack),
+            _ => Err(Error::new(
+                ErrorKind::InvalidData,
+                "Failed to decode driver status.",
+            )),
+        }
+    }
+}
+
+impl TryFrom<u8> for PitStatus {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(PitStatus::None),
+            1 => Ok(PitStatus::Pitting),
+            2 => Ok(PitStatus::InPits),
+            _ => Err(Error::new(
+                ErrorKind::InvalidData,
+                "Failed to decode pit status.",
+            )),
+        }
+    }
+}
+
+impl TryFrom<u8> for ResultStatus {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(ResultStatus::Invalid),
+            1 => Ok(ResultStatus::Inactive),
+            2 => Ok(ResultStatus::Active),
+            3 => Ok(ResultStatus::Finished),
+            4 => Ok(ResultStatus::Disqualified),
+            5 => Ok(ResultStatus::NotClassified),
+            6 => Ok(ResultStatus::Retired),
+            _ => Err(Error::new(
+                ErrorKind::InvalidData,
+                "Failed to decode result status.",
+            )),
+        }
+    }
+}
+
+impl TryFrom<u8> for Sector {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Sector::First),
+            1 => Ok(Sector::Second),
+            2 => Ok(Sector::Third),
+            _ => Err(Error::new(
+                ErrorKind::InvalidData,
+                "Failed to decode sector.",
+            )),
+        }
+    }
+}
+
+impl FromBytes for LapPacket {
+    fn buffer_size() -> usize {
+        843
+    }
+
+    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    where
+        Self: Sized,
+    {
+        let header = PacketHeader::decode(cursor)?;
+        let mut laps = Vec::with_capacity(20);
+
+        for _ in 0..20 {
+            laps.push(Lap {
+                last_lap_time: cursor.get_f32_le(),
+                curent_lap_time: cursor.get_f32_le(),
+                best_lap_time: cursor.get_f32_le(),
+                sector1_time: cursor.get_f32_le(),
+                sector2_time: cursor.get_f32_le(),
+                lap_distance: cursor.get_f32_le(),
+                total_distance: cursor.get_f32_le(),
+                safety_car_delta: cursor.get_f32_le(),
+                position: cursor.get_u8(),
+                current_lap_number: cursor.get_u8(),
+                pit_status: PitStatus::try_from(cursor.get_u8())?,
+                sector: Sector::try_from(cursor.get_u8())?,
+                is_lap_valid: cursor.get_u8() > 1,
+                penalties: cursor.get_u8(),
+                grid_position: cursor.get_u8(),
+                driver_status: DriverStatus::try_from(cursor.get_u8())?,
+                result_status: ResultStatus::try_from(cursor.get_u8())?,
+            });
+        }
+
+        Ok(LapPacket { header, laps })
+    }
 }
