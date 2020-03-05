@@ -1,5 +1,9 @@
 use crate::nineteen::PacketHeader;
+use crate::packet::FromBytes;
 use bitflags::bitflags;
+use bytes::{Buf, BytesMut};
+use std::convert::TryFrom;
+use std::io::{Cursor, Error, ErrorKind};
 
 bitflags! {
     pub struct Button: u32 {
@@ -105,4 +109,119 @@ pub struct TelemetryPacket {
 
     /// Bit flag indicating which buttons are currently pressed.
     pub button_status: Button,
+}
+
+impl TryFrom<i8> for Gear {
+    type Error = Error;
+
+    fn try_from(value: i8) -> Result<Self, Self::Error> {
+        match value {
+            -1 => Ok(Gear::Reverse),
+            0 => Ok(Gear::Neutral),
+            1 => Ok(Gear::First),
+            2 => Ok(Gear::Second),
+            3 => Ok(Gear::Third),
+            4 => Ok(Gear::Fourth),
+            5 => Ok(Gear::Fifth),
+            6 => Ok(Gear::Sixth),
+            7 => Ok(Gear::Seventh),
+            8 => Ok(Gear::Eighth),
+            _ => Err(Error::new(ErrorKind::InvalidData, "Failed to decode gear.")),
+        }
+    }
+}
+
+impl TryFrom<u8> for Surface {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Surface::Tarmac),
+            1 => Ok(Surface::RumbleStrip),
+            2 => Ok(Surface::Concrete),
+            3 => Ok(Surface::Rock),
+            4 => Ok(Surface::Gravel),
+            5 => Ok(Surface::Mud),
+            6 => Ok(Surface::Sand),
+            7 => Ok(Surface::Grass),
+            8 => Ok(Surface::Water),
+            9 => Ok(Surface::Cobblestone),
+            10 => Ok(Surface::Metal),
+            11 => Ok(Surface::Ridged),
+            _ => Err(Error::new(
+                ErrorKind::InvalidData,
+                "Failed to decode surface.",
+            )),
+        }
+    }
+}
+
+impl FromBytes for TelemetryPacket {
+    fn buffer_size() -> usize {
+        1347
+    }
+
+    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    where
+        Self: Sized,
+    {
+        let header = PacketHeader::decode(cursor)?;
+        let mut telemetry = Vec::with_capacity(20);
+
+        for _ in 0..20 {
+            telemetry.push(Telemetry {
+                speed: cursor.get_u16_le(),
+                throttle: cursor.get_f32_le(),
+                steering: cursor.get_f32_le(),
+                brake: cursor.get_f32_le(),
+                clutch: cursor.get_u8(),
+                gear: Gear::try_from(cursor.get_i8())?,
+                engine_rpm: cursor.get_u16_le(),
+                drs: cursor.get_u8() > 0,
+                rev_lights: cursor.get_u8(),
+                brake_temperature: (
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                ),
+                tyre_surface_temperature: (
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                ),
+                tyre_inner_temperature: (
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                    cursor.get_u16_le(),
+                ),
+                engine_temperature: cursor.get_u16_le(),
+                tyre_pressure: (
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                    cursor.get_f32_le(),
+                ),
+                surface_type: (
+                    Surface::try_from(cursor.get_u8())?,
+                    Surface::try_from(cursor.get_u8())?,
+                    Surface::try_from(cursor.get_u8())?,
+                    Surface::try_from(cursor.get_u8())?,
+                ),
+            });
+        }
+
+        let button_status = match Button::from_bits(cursor.get_u32_le()) {
+            Some(button) => button,
+            None => Button { bits: 0 },
+        };
+
+        Ok(TelemetryPacket {
+            header,
+            telemetry,
+            button_status,
+        })
+    }
 }
