@@ -1,4 +1,7 @@
 use crate::nineteen::PacketHeader;
+use crate::packet::FromBytes;
+use bytes::{Buf, BytesMut};
+use std::io::{Cursor, Error};
 
 pub struct CarSetup {
     /// Front wing aero.
@@ -69,4 +72,45 @@ pub struct CarSetupPacket {
     /// The setup for each car in the session. In multiplayer sessions, the
     /// setup for the cars of other players will appear empty.
     pub setups: Vec<CarSetup>,
+}
+
+impl FromBytes for CarSetupPacket {
+    fn buffer_size() -> usize {
+        843
+    }
+
+    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    where
+        Self: Sized,
+    {
+        let header = PacketHeader::decode(cursor)?;
+        let mut setups = Vec::with_capacity(20);
+
+        for _ in 0..20 {
+            setups.push(CarSetup {
+                front_wing: cursor.get_u8(),
+                rear_wing: cursor.get_u8(),
+                on_throttle: cursor.get_u8(),
+                off_throttle: cursor.get_u8(),
+                front_camber: cursor.get_f32_le(),
+                rear_camber: cursor.get_f32_le(),
+                front_toe: cursor.get_f32_le(),
+                rear_toe: cursor.get_f32_le(),
+                front_suspension: cursor.get_u8(),
+                rear_suspension: cursor.get_u8(),
+                front_anti_roll_bar: cursor.get_u8(),
+                rear_anti_roll_bar: cursor.get_u8(),
+                front_suspension_height: cursor.get_u8(),
+                rear_suspension_height: cursor.get_u8(),
+                brake_pressure: cursor.get_u8(),
+                brake_bias: cursor.get_u8(),
+                front_tyre_pressure: cursor.get_f32_le(),
+                rear_tyre_pressure: cursor.get_f32_le(),
+                ballast: cursor.get_u8(),
+                fuel_load: cursor.get_f32_le(),
+            })
+        }
+
+        Ok(CarSetupPacket { header, setups })
+    }
 }
