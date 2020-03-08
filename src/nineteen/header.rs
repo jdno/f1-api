@@ -99,8 +99,7 @@ impl FromBytes for PacketHeader {
 
 #[cfg(test)]
 mod tests {
-    use crate::nineteen::header::PacketHeader;
-    use crate::nineteen::PacketType;
+    use crate::nineteen::header::{PacketHeader, PacketType};
     use crate::packet::FromBytes;
     use bytes::{BufMut, BytesMut};
     use std::io::{Cursor, ErrorKind};
