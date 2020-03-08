@@ -103,7 +103,7 @@ mod tests {
     use crate::nineteen::PacketType;
     use crate::packet::FromBytes;
     use bytes::{BufMut, BytesMut};
-    use std::io::ErrorKind;
+    use std::io::{Cursor, ErrorKind};
 
     #[test]
     fn from_bytes() {
@@ -118,7 +118,8 @@ mod tests {
         bytes.put_u32_le(u32::max_value());
         bytes.put_u8(0);
 
-        let packet = PacketHeader::from_bytes(bytes).unwrap();
+        let mut cursor = Cursor::new(bytes);
+        let packet = PacketHeader::from_bytes(&mut cursor).unwrap();
 
         assert_eq!(2019, packet.packet_format);
         assert_eq!(1, packet.game_major_version);
@@ -142,7 +143,9 @@ mod tests {
         let padding = vec![0u8; 17];
         bytes.put(padding.as_slice());
 
-        match PacketHeader::from_bytes(bytes) {
+        let mut cursor = Cursor::new(bytes);
+
+        match PacketHeader::from_bytes(&mut cursor) {
             Ok(_) => panic!("Expected decoding header with invalid packet id to fail"),
             Err(error) => assert_eq!(ErrorKind::InvalidData, error.kind()),
         }

@@ -23,12 +23,10 @@ pub trait FromBytes {
     /// packet to an F1 packet of this library. Before attempting the
     /// conversion, this function checks that the buffer has the right size. The
     /// actual decoding is done through the `decode` function in the same trait.
-    fn from_bytes(bytes: BytesMut) -> Result<Self, Error>
+    fn from_bytes(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
     where
         Self: Sized,
     {
-        let mut cursor = Cursor::new(bytes);
-
         let expected_size = Self::buffer_size();
         let packet_size = cursor.remaining();
 
@@ -42,7 +40,7 @@ pub trait FromBytes {
             ));
         }
 
-        Self::decode(&mut cursor)
+        Self::decode(cursor)
     }
 
     /// Define the expected buffer size in bytes.
@@ -126,15 +124,18 @@ mod tests {
         let mut bytes = BytesMut::new();
         bytes.put_u8(1);
 
-        let packet = Packet::from_bytes(bytes).unwrap();
+        let mut cursor = Cursor::new(bytes);
+
+        let packet = Packet::from_bytes(&mut cursor).unwrap();
         assert_eq!(1, packet.id);
     }
 
     #[test]
     fn from_bytes_with_zero_length() {
         let bytes = BytesMut::with_capacity(0);
+        let mut cursor = Cursor::new(bytes);
 
-        match Packet::from_bytes(bytes) {
+        match Packet::from_bytes(&mut cursor) {
             Ok(_) => panic!("Expected decoding header from zero length byte buffer to fail"),
             Err(error) => assert_eq!(ErrorKind::UnexpectedEof, error.kind()),
         }
