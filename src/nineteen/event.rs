@@ -175,6 +175,7 @@ mod tests {
     use crate::nineteen::event::{Event, EventPacket};
     use crate::packet::FromBytes;
     use bytes::{BufMut, BytesMut};
+    use std::io::Cursor;
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);
@@ -202,7 +203,9 @@ mod tests {
         bytes.put_u8(1);
         bytes.put_f32(2.0);
 
-        let packet = EventPacket::from_bytes(bytes).unwrap();
+        let mut cursor = Cursor::new(bytes);
+
+        let packet = EventPacket::from_bytes(&mut cursor).unwrap();
         match packet.event {
             Event::FastestLap(fastest_lap) => assert!(fastest_lap.lap_time - 2.0 < 0.0001),
             _ => panic!("Expected a fastest lap event"),
@@ -221,7 +224,9 @@ mod tests {
         let padding = vec![0u8; 5];
         bytes.put(padding.as_slice());
 
-        let packet = EventPacket::from_bytes(bytes).unwrap();
+        let mut cursor = Cursor::new(bytes);
+
+        let packet = EventPacket::from_bytes(&mut cursor).unwrap();
         assert_eq!(Event::SessionStarted, packet.event)
     }
 }

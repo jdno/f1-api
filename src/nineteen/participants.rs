@@ -674,7 +674,8 @@ mod tests {
         let padding = vec![0u8; 1034];
         bytes.put(padding.as_slice());
 
-        let packet = ParticipantsPacket::from_bytes(bytes).unwrap();
+        let mut cursor = Cursor::new(bytes);
+        let packet = ParticipantsPacket::from_bytes(&mut cursor).unwrap();
 
         assert_eq!(1, packet.participants.len());
         let participant = &packet.participants[0];
