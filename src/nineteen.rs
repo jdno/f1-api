@@ -67,7 +67,7 @@ impl TryFrom<i8> for Flag {
 }
 
 impl Packet {
-    fn peek_packet_id(cursor: &mut Cursor<BytesMut>) -> Result<PacketType, Error> {
+    fn peek_packet_id(cursor: &mut Cursor<&mut BytesMut>) -> Result<PacketType, Error> {
         cursor.set_position(5 as u64);
 
         let packet_type = PacketType::try_from(cursor.get_u8())?;
@@ -82,7 +82,7 @@ impl FromBytes for Packet {
         6
     }
 
-    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
     where
         Self: Sized,
     {

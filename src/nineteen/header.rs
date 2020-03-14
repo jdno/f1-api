@@ -82,7 +82,7 @@ impl FromBytes for PacketHeader {
         23
     }
 
-    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error> {
+    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error> {
         Ok(PacketHeader {
             packet_format: cursor.get_u16_le(),
             game_major_version: cursor.get_u8(),
@@ -117,7 +117,7 @@ mod tests {
         bytes.put_u32_le(u32::max_value());
         bytes.put_u8(0);
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
         let packet = PacketHeader::from_bytes(&mut cursor).unwrap();
 
         assert_eq!(2019, packet.packet_format);
@@ -142,7 +142,7 @@ mod tests {
         let padding = vec![0u8; 17];
         bytes.put(padding.as_slice());
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
 
         match PacketHeader::from_bytes(&mut cursor) {
             Ok(_) => panic!("Expected decoding header with invalid packet id to fail"),

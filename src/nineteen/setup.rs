@@ -79,7 +79,7 @@ impl FromBytes for CarSetupPacket {
         843
     }
 
-    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
     where
         Self: Sized,
     {

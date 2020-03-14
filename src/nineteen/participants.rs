@@ -561,7 +561,7 @@ impl TryFrom<u8> for UdpSetting {
 }
 
 impl ParticipantsPacket {
-    fn decode_name(cursor: &mut Cursor<BytesMut>) -> String {
+    fn decode_name(cursor: &mut Cursor<&mut BytesMut>) -> String {
         let mut letters = Vec::with_capacity(40);
 
         for _ in 0..40 {
@@ -583,7 +583,7 @@ impl FromBytes for ParticipantsPacket {
         1104
     }
 
-    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
     where
         Self: Sized,
     {
@@ -644,7 +644,7 @@ mod tests {
         bytes.put_u8(b'e');
         bytes.put_u8(0);
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
 
         let name = ParticipantsPacket::decode_name(&mut cursor);
         assert_eq!(String::from("Name"), name);
@@ -674,7 +674,7 @@ mod tests {
         let padding = vec![0u8; 1034];
         bytes.put(padding.as_slice());
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
         let packet = ParticipantsPacket::from_bytes(&mut cursor).unwrap();
 
         assert_eq!(1, packet.participants.len());
