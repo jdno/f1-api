@@ -1,7 +1,12 @@
 //! Utilities to decode UDP packets into high-level data structures.
 
+use crate::nineteen;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
+
+pub enum Packet {
+    Nineteen(nineteen::Packet),
+}
 
 /// A trait to decode UDP packets.
 ///

@@ -1,5 +1,6 @@
 //! A Rust implementation of the telemetry API provided by modern F1 video games
 
+pub mod codec;
 pub mod nineteen;
 pub mod packet;
 
