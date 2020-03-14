@@ -23,7 +23,7 @@ pub trait FromBytes {
     /// packet to an F1 packet of this library. Before attempting the
     /// conversion, this function checks that the buffer has the right size. The
     /// actual decoding is done through the `decode` function in the same trait.
-    fn from_bytes(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    fn from_bytes(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
     where
         Self: Sized,
     {
@@ -70,7 +70,7 @@ pub trait FromBytes {
     ///
     ///     // Other trait functions...
     ///     #
-    ///     # fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error> where
+    ///     # fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error> where
     ///     #    Self: Sized{
     ///     #    unimplemented!()
     ///     # }
@@ -89,7 +89,7 @@ pub trait FromBytes {
     ///
     /// This function panics if the buffer is smaller than the expected size of
     /// the packet.
-    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
     where
         Self: Sized;
 }
@@ -109,7 +109,7 @@ mod tests {
             1
         }
 
-        fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+        fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
         where
             Self: Sized,
         {
@@ -124,7 +124,7 @@ mod tests {
         let mut bytes = BytesMut::new();
         bytes.put_u8(1);
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
 
         let packet = Packet::from_bytes(&mut cursor).unwrap();
         assert_eq!(1, packet.id);
@@ -132,8 +132,8 @@ mod tests {
 
     #[test]
     fn from_bytes_with_zero_length() {
-        let bytes = BytesMut::with_capacity(0);
-        let mut cursor = Cursor::new(bytes);
+        let mut bytes = BytesMut::with_capacity(0);
+        let mut cursor = Cursor::new(&mut bytes);
 
         match Packet::from_bytes(&mut cursor) {
             Ok(_) => panic!("Expected decoding header from zero length byte buffer to fail"),
@@ -151,7 +151,7 @@ mod tests {
         let mut bytes = BytesMut::new();
         bytes.put_u8(1);
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
 
         let packet = Packet::decode(&mut cursor).unwrap();
         assert_eq!(1, packet.id)
@@ -160,8 +160,8 @@ mod tests {
     #[test]
     #[should_panic(expected = "self.remaining() >= 1")]
     fn decode_with_zero_length() {
-        let bytes = BytesMut::with_capacity(0);
-        let mut cursor = Cursor::new(bytes);
+        let mut bytes = BytesMut::with_capacity(0);
+        let mut cursor = Cursor::new(&mut bytes);
 
         Packet::decode(&mut cursor).unwrap();
     }

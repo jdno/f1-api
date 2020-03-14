@@ -52,7 +52,7 @@ pub struct EventPacket {
 }
 
 impl EventPacket {
-    fn peek_event_code(cursor: &mut Cursor<BytesMut>) -> String {
+    fn peek_event_code(cursor: &mut Cursor<&mut BytesMut>) -> String {
         cursor.set_position(PacketHeader::buffer_size() as u64);
 
         let event_code = [
@@ -68,21 +68,21 @@ impl EventPacket {
         event_code
     }
 
-    fn decode_session_started(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_session_started(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::SessionStarted,
         })
     }
 
-    fn decode_session_ended(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_session_ended(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::SessionEnded,
         })
     }
 
-    fn decode_fastest_lap(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_fastest_lap(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::FastestLap(FastestLap {
@@ -92,7 +92,7 @@ impl EventPacket {
         })
     }
 
-    fn decode_retirement(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_retirement(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::Retirement(Retirement {
@@ -101,21 +101,21 @@ impl EventPacket {
         })
     }
 
-    fn decode_drs_enabled(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_drs_enabled(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::DrsEnabled,
         })
     }
 
-    fn decode_drs_disabled(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_drs_disabled(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::DrsDisabled,
         })
     }
 
-    fn decode_teammate_pits(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_teammate_pits(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::TeammatesInPits(TeammateInPits {
@@ -124,14 +124,14 @@ impl EventPacket {
         })
     }
 
-    fn decode_checkered_flag(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_checkered_flag(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::ChequeredFlag,
         })
     }
 
-    fn decode_race_winner(cursor: &mut Cursor<BytesMut>) -> Result<EventPacket, Error> {
+    fn decode_race_winner(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
             event: Event::RaceWinner(RaceWinner {
@@ -146,7 +146,7 @@ impl FromBytes for EventPacket {
         32
     }
 
-    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
     where
         Self: Sized,
     {
@@ -203,7 +203,7 @@ mod tests {
         bytes.put_u8(1);
         bytes.put_f32(2.0);
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
 
         let packet = EventPacket::from_bytes(&mut cursor).unwrap();
         match packet.event {
@@ -224,7 +224,7 @@ mod tests {
         let padding = vec![0u8; 5];
         bytes.put(padding.as_slice());
 
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = Cursor::new(&mut bytes);
 
         let packet = EventPacket::from_bytes(&mut cursor).unwrap();
         assert_eq!(Event::SessionStarted, packet.event)

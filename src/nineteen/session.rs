@@ -261,7 +261,7 @@ impl FromBytes for SessionPacket {
         149
     }
 
-    fn decode(cursor: &mut Cursor<BytesMut>) -> Result<Self, Error>
+    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
     where
         Self: Sized,
     {
