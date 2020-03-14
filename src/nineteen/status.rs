@@ -1,15 +1,19 @@
+//! Packet with the status of each car in the session
+
 use crate::nineteen::{Flag, PacketHeader};
 use crate::packet::FromBytes;
 use bitflags::_core::convert::TryFrom;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
+/// Traction control.
 pub enum TractionControl {
     Off = 0,
     Low = 1,
     High = 2,
 }
 
+/// Fuel mix.
 pub enum FuelMix {
     Lean = 0,
     Standard = 1,
@@ -17,12 +21,19 @@ pub enum FuelMix {
     Max = 3,
 }
 
+/// DRS.
 pub enum DrsStatus {
     Unknown = -1,
     NotAllowed = 0,
     Allowed = 1,
 }
 
+/// The actual/physical tyre compound.
+///
+/// F1 2019 supports different tyre compounds. The game differentiates between the actual/physical
+/// tyre compounds that influence the handling of the car, and purely visual ones that simply change
+/// the look of the tyre. All types of formula racing (modern F1, F2, classic F1) share the same
+/// virtual compounds, but have different actual compounds.
 pub enum TyreCompound {
     F1Intermediate = 7,
     F1Wet = 8,
@@ -40,6 +51,12 @@ pub enum TyreCompound {
     F1C1 = 20,
 }
 
+/// The virtual tyre compound.
+///
+/// F1 2019 supports different tyre compounds. The game differentiates between the actual/physical
+/// tyre compounds that influence the handling of the car, and purely visual ones that simply change
+/// the look of the tyre. All types of formula racing (modern F1, F2, classic F1) share the same
+/// virtual compounds, but have different actual compounds.
 pub enum VisualCompound {
     Intermediate = 7,
     Wet = 8,
@@ -48,6 +65,7 @@ pub enum VisualCompound {
     Hard = 18,
 }
 
+/// ERS deploy mode.
 pub enum ErsDeployMode {
     None = 0,
     Low = 1,
@@ -57,89 +75,95 @@ pub enum ErsDeployMode {
     Hotlap = 5,
 }
 
+/// The status of a race car.
+///
+/// The status of each car is a collection of properties that can change over time. It includes data
+/// about the fuel, the engine, the various assistance systems like ABS, DRS, and ERS, and the
+/// damage the car has sustained.
 pub struct CarStatus {
     /// Traction control setting.
-    traction_control: TractionControl,
+    pub traction_control: TractionControl,
 
     /// Whether ABS is enabled.
-    abs: bool,
+    pub abs: bool,
 
     /// Fuel mix setting.
-    fuel_mix: FuelMix,
+    pub fuel_mix: FuelMix,
 
     /// Front brake bias (percentage).
-    brake_bias: u8,
+    pub brake_bias: u8,
 
     /// Whether the pit speed limiter is engaged.
-    pit_limiter: bool,
+    pub pit_limiter: bool,
 
     /// Remaining fuel mass in tank.
-    fuel_remaining: f32,
+    pub fuel_remaining: f32,
 
     /// Fuel capacity.
-    fuel_capacity: f32,
+    pub fuel_capacity: f32,
 
     /// Remaining fuel in terms of laps.
-    fuel_remaining_laps: f32,
+    pub fuel_remaining_laps: f32,
 
     /// The car's maximum RPM where the rev limiter kicks in.
-    max_rpm: u16,
+    pub max_rpm: u16,
 
     /// The car's idle RPM.
-    idle_rpm: u16,
+    pub idle_rpm: u16,
 
     /// The car's number of gears.
-    gear_count: u8,
+    pub gear_count: u8,
 
     /// The status of DRS.
-    drs: DrsStatus,
+    pub drs: DrsStatus,
 
     /// The tyre wear at the RL, RR, FL, and FR in percent.
-    tyre_wear: (u8, u8, u8, u8),
+    pub tyre_wear: (u8, u8, u8, u8),
 
     /// The actual compound of the tyres.
-    tyre_compound: TyreCompound,
+    pub tyre_compound: TyreCompound,
 
     /// The visual compound of the tyres.
-    visual_compound: VisualCompound,
+    pub visual_compound: VisualCompound,
 
     /// Tyre damage at the RL, RR, FL, and FR in percent.
-    tyre_damage: (u8, u8, u8, u8),
+    pub tyre_damage: (u8, u8, u8, u8),
 
     /// Damage to the left front wing in percent.
-    front_left_wing_damage: u8,
+    pub front_left_wing_damage: u8,
 
     /// Damage to the right front wing in percent.
-    front_right_wing_damage: u8,
+    pub front_right_wing_damage: u8,
 
     /// Rear wing damage in percent.
-    rear_wing_damage: u8,
+    pub rear_wing_damage: u8,
 
     /// Engine damage in percent.
-    engine_damage: u8,
+    pub engine_damage: u8,
 
     /// Gear box damage in percent.
-    gear_box_damage: u8,
+    pub gear_box_damage: u8,
 
     /// Flags shown to the current car.
-    vehicle_flags: Flag,
+    pub vehicle_flags: Flag,
 
     /// ERS energy store in Joules.
-    ers_energy: f32,
+    pub ers_energy: f32,
 
     /// ERS deploy mode.
-    ers_mode: ErsDeployMode,
+    pub ers_mode: ErsDeployMode,
 
     /// ERS energy harvested this lap by the MGU-K.
-    ers_harvest_mguk: f32,
+    pub ers_harvest_mguk: f32,
 
     /// ERS energy harvested this lap by the MGU-H.
-    ers_harvest_mguh: f32,
+    pub ers_harvest_mguh: f32,
 
     /// ERS energy deployed this lap.
-    ers_deployed: f32,
+    pub ers_deployed: f32,
 }
 
+/// A packet with the status of each car in the session.
 pub struct CarStatusPacket {
     /// Each packet starts with a packet header.
     pub header: PacketHeader,

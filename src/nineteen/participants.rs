@@ -1,15 +1,19 @@
+//! Packet with a list of all participants in a session
+
 use crate::nineteen::PacketHeader;
 use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};
 
+/// Indicates whether a car is controlled by the AI or a human.
 #[derive(Debug, PartialEq)]
 pub enum Controller {
     Human = 0,
     AI = 1,
 }
 
+/// A list of all drivers in F1 2019.
 #[derive(Debug, PartialEq)]
 pub enum Driver {
     CarlosSainz = 0,
@@ -91,6 +95,7 @@ pub enum Driver {
     RalphBoschung = 89,
 }
 
+/// A list of all teams in F1 2019.
 #[derive(Debug, PartialEq)]
 pub enum Team {
     Mercedes = 0,
@@ -148,6 +153,7 @@ pub enum Team {
     Ferrari2010 = 65,
 }
 
+/// A list of all nationalities in F1 2019.
 #[derive(Debug, PartialEq)]
 pub enum Nationality {
     American = 1,
@@ -246,28 +252,32 @@ pub enum UdpSetting {
     Public = 1,
 }
 
+/// A participant in an F1 2019 session.
+///
+/// F1 2019 publishes information about each participant in a session, including their name, team,
+/// and whether they are a human or AI driver.
 pub struct Participant {
     /// Each car can be controlled by an AI or a human.
-    controller: Controller,
+    pub controller: Controller,
 
     /// The driver of the car.
-    driver: Driver,
+    pub driver: Driver,
 
     /// The team for the car.
-    team: Team,
+    pub team: Team,
 
     /// The race number of the car.
-    race_number: u8,
+    pub race_number: u8,
 
     /// The driver's nationality.
-    nationality: Nationality,
+    pub nationality: Nationality,
 
-    /// The driver's name. For multiplayer games, the Steam ID or LAN name is
-    /// used.
-    name: String,
+    /// The driver's name. In single player sessions, the name matches the driver. In multi player
+    /// sessions, the player's Steam ID or LAN name is used.
+    pub name: String,
 
     /// The participant's UDP setting.
-    telemetry: UdpSetting,
+    pub telemetry: UdpSetting,
 }
 
 pub struct ParticipantsPacket {
@@ -561,6 +571,11 @@ impl TryFrom<u8> for UdpSetting {
 }
 
 impl ParticipantsPacket {
+    /// Decode a driver's name.
+    ///
+    /// F1 2019 publishes the name of each driver as a null-terminated string with a maximum length
+    /// of 40 bytes. This method reads each character until the null byte, and returns them as a
+    /// string.
     fn decode_name(cursor: &mut Cursor<&mut BytesMut>) -> String {
         let mut letters = Vec::with_capacity(40);
 

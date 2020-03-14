@@ -1,8 +1,11 @@
+//! Packet with event details from F1 2019
+
 use crate::nineteen::{PacketHeader, VehicleIndex};
 use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
+/// The fastest lap time done by a particular driver.
 #[derive(Debug, PartialEq)]
 pub struct FastestLap {
     /// The index of the car achieving the fastest lap.
@@ -12,24 +15,32 @@ pub struct FastestLap {
     pub lap_time: f32,
 }
 
+/// A driver that is retiring from the race, most often for technical reasons.
 #[derive(Debug, PartialEq)]
 pub struct Retirement {
     /// The index of the car that is retiring from the race.
     pub vehicle_index: VehicleIndex,
 }
 
+/// A teammate that has just entered the pits.
 #[derive(Debug, PartialEq)]
 pub struct TeammateInPits {
     /// The index of the teammate's car, who is currently pitting.
     pub vehicle_index: VehicleIndex,
 }
 
+/// The driver that has won the race.
 #[derive(Debug, PartialEq)]
 pub struct RaceWinner {
     /// The index of the car winning the race.
     pub vehicle_index: VehicleIndex,
 }
 
+/// Events that can occur during a session.
+///
+/// F1 2019 publishes event packets when certain events occur during a session. Each potential event
+/// is represented as a variant of this enum. Some events carry a payload, which provides more
+/// details about the event, e.g. which driver has retired in case of a retirement.
 #[derive(Debug, PartialEq)]
 pub enum Event {
     SessionStarted,
@@ -43,6 +54,11 @@ pub enum Event {
     RaceWinner(RaceWinner),
 }
 
+/// A packet with details about an event that occurred in the session.
+///
+/// F1 2019 publishes event packets when certain events occur during a session. The packet consists
+/// of the packet header, and an `Event`. The event can carry a payload, e.g. the driver who is
+/// retiring for a retirement event.
 pub struct EventPacket {
     /// Each packet starts with a packet header.
     pub header: PacketHeader,
@@ -52,6 +68,11 @@ pub struct EventPacket {
 }
 
 impl EventPacket {
+    /// Peek into the packet to determine the event type.
+    ///
+    /// The event packet contains a string that identifies the type of the event. To be able to
+    /// properly parse the packet, its type must be known beforehand. Using this method, the event
+    /// code can be retrieved from the packet without modifying the cursor.
     fn peek_event_code(cursor: &mut Cursor<&mut BytesMut>) -> String {
         cursor.set_position(PacketHeader::buffer_size() as u64);
 
@@ -68,6 +89,7 @@ impl EventPacket {
         event_code
     }
 
+    /// Decode the "Session Started" event.
     fn decode_session_started(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -75,6 +97,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "Session Ended" event.
     fn decode_session_ended(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -82,6 +105,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "Fastest Lap" event.
     fn decode_fastest_lap(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -92,6 +116,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "Retirement" event.
     fn decode_retirement(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -101,6 +126,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "DRS Enabled" event.
     fn decode_drs_enabled(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -108,6 +134,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "DRS Disabled" event.
     fn decode_drs_disabled(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -115,6 +142,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "Teammate in Pits" event.
     fn decode_teammate_pits(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -124,6 +152,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "Chequered Flag" event.
     fn decode_checkered_flag(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
@@ -131,6 +160,7 @@ impl EventPacket {
         })
     }
 
+    /// Decode the "Race Winner" event.
     fn decode_race_winner(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
         Ok(EventPacket {
             header: PacketHeader::decode(cursor)?,
