@@ -1,9 +1,16 @@
+//! Packet header that prefixes each packet published by F1 2019
+
 use crate::nineteen::VehicleIndex;
 use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};
 
+/// The different types of packets published by F1 2019.
+///
+/// F1 2019 publishes different packets with different data in different intervals. The packet
+/// header at the beginning of each UDP packet identifies the type of packet, which is mapped to the
+/// `PacketType` enum.
 #[derive(Debug, PartialEq)]
 pub enum PacketType {
     Motion = 0,
@@ -16,6 +23,12 @@ pub enum PacketType {
     Status = 7,
 }
 
+/// The packet header at the beginning of each UDP packet.
+///
+/// Each packet published by F1 2019 starts with the packet header. The header provides information
+/// that is required to successfully parse the package. Most importantly, it identifies the version
+/// of the game (e.g. 2019 or 2018) and the type of packet. Based on this information, the right
+/// decoder is picked to turn the UDP packet into a Rust struct.
 pub struct PacketHeader {
     /// The packet format is the version of the packet. Newer games can fall
     /// back to older packet formats to ensure interoperability with existing

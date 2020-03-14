@@ -1,4 +1,11 @@
 //! API specification for F1 2019.
+//!
+//! F1 2019 publishes session and telemetry data through a UDP interface. It defines several
+//! different packet types, each containing a particular set of data. These packets are published at
+//! different intervals depending on how quickly their data changes.
+//!
+//! The full API specification can be found here:
+//! https://forums.codemasters.com/topic/44592-f1-2019-udp-specification/
 
 use crate::nineteen::event::EventPacket;
 use crate::nineteen::header::PacketType;
@@ -26,6 +33,12 @@ pub mod setup;
 pub mod status;
 pub mod telemetry;
 
+/// Flags shown in F1 2019.
+///
+/// Flags are an essential tool to communicate the status of a race to the drivers on track. A green
+/// flag signals the race start or restart, while a yellow flag warns of hazards on track. The red
+/// flag aborts a race or session. The blue flag signals that a faster car is approaching from
+/// behind.
 pub enum Flag {
     Invalid = -1,
     None = 0,
@@ -35,6 +48,10 @@ pub enum Flag {
     Red = 4,
 }
 
+/// A packet published by F1 2019.
+///
+/// F1 2019 publishes different packets with different data at different intervals. Each packet is
+/// decoded to match an internal representation.
 pub enum Packet {
     Event(EventPacket),
     Lap(LapPacket),
@@ -67,6 +84,11 @@ impl TryFrom<i8> for Flag {
 }
 
 impl Packet {
+    /// Peek into the packet to determine the packet type.
+    ///
+    /// The packet contains an id in its header that identifies the type of the packet. To be able
+    /// to properly parse the packet, its type must be known beforehand. Using this function, the
+    /// packet id can be retrieved from the packet without modifying the cursor.
     fn peek_packet_id(cursor: &mut Cursor<&mut BytesMut>) -> Result<PacketType, Error> {
         cursor.set_position(5 as u64);
 

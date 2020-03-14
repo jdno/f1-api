@@ -1,3 +1,5 @@
+//! Packet with the telemetry data of each car in the session
+
 use crate::nineteen::PacketHeader;
 use crate::packet::FromBytes;
 use bitflags::bitflags;
@@ -6,6 +8,10 @@ use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};
 
 bitflags! {
+    /// A bit field with currently pressed buttons.
+    ///
+    /// F1 2019 publishes which buttons are currently being pressed by the user. This information is
+    /// encoded in a bit field, where each bit represents a different button.
     pub struct Button: u32 {
         const CROSS_OR_A = 0x001;
         const TRIANGLE_OR_Y = 0x0002;
@@ -25,6 +31,7 @@ bitflags! {
     }
 }
 
+/// The gear the car is in.
 pub enum Gear {
     Reverse = -1,
     Neutral = 0,
@@ -38,6 +45,7 @@ pub enum Gear {
     Eighth = 8,
 }
 
+/// The surface areas a tyre can be in contact with.
 pub enum Surface {
     Tarmac = 0,
     RumbleStrip = 1,
@@ -53,53 +61,58 @@ pub enum Surface {
     Ridged = 11,
 }
 
+/// The telemetry of a race car.
+///
+/// Telemetry provides detailed, and quickly changing data on the inner mechanics of each car, e.g.
+/// its speed, engine RPMs, and temperatures.
 pub struct Telemetry {
     /// The speed of the car in kilometers per hour.
-    speed: u16,
+    pub speed: u16,
 
     /// Ratio of applied throttle (0.0 to 1.0).
-    throttle: f32,
+    pub throttle: f32,
 
     /// Ratio of steering input (-1.0 full lock left to 1.0 full lock right).
-    steering: f32,
+    pub steering: f32,
 
     /// Ratio of brake applied (0.0 to 1.0).
-    brake: f32,
+    pub brake: f32,
 
     /// Amount of clutch applied (0 to 100).
-    clutch: u8,
+    pub clutch: u8,
 
     /// The current gear.
-    gear: Gear,
+    pub gear: Gear,
 
     /// The engine's RPM.
-    engine_rpm: u16,
+    pub engine_rpm: u16,
 
     /// Whether the DRS is deployed.
-    drs: bool,
+    pub drs: bool,
 
     /// Rev lights indicator (percentage).
-    rev_lights: u8,
+    pub rev_lights: u8,
 
     /// Brake temperature at the RL, RR, FL, FR in degrees celsius.
-    brake_temperature: (u16, u16, u16, u16),
+    pub brake_temperature: (u16, u16, u16, u16),
 
     /// Tyre surface temperature at the RL, RR, FL, FR in degrees celsius.
-    tyre_surface_temperature: (u16, u16, u16, u16),
+    pub tyre_surface_temperature: (u16, u16, u16, u16),
 
     /// Tyre inner temperature at the RL, RR, FL, FR in degrees celsius.
-    tyre_inner_temperature: (u16, u16, u16, u16),
+    pub tyre_inner_temperature: (u16, u16, u16, u16),
 
     /// Engine temperature in degrees celsius.
-    engine_temperature: u16,
+    pub engine_temperature: u16,
 
     /// Tyre pressure at the RL, RR, FL, FR in PSI.
-    tyre_pressure: (f32, f32, f32, f32),
+    pub tyre_pressure: (f32, f32, f32, f32),
 
     /// The type of the surface the RL, RR, FL, and FR tyre have contact with.
-    surface_type: (Surface, Surface, Surface, Surface),
+    pub surface_type: (Surface, Surface, Surface, Surface),
 }
 
+/// A packet with telemetry data for each car in the session.
 pub struct TelemetryPacket {
     /// Each packet starts with a packet header.
     pub header: PacketHeader,

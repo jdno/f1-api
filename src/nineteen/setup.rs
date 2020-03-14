@@ -1,70 +1,80 @@
+//! Packet with the setups of all cars in the session
+
 use crate::nineteen::PacketHeader;
 use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error};
 
+/// A setup of an F1 race car.
+///
+/// The setup of the race cars in F1 2019 can be modified to improve the handling of the car on a
+/// particular race track. The setup consists of a set of parameters that can be adjusted.
 pub struct CarSetup {
     /// Front wing aero.
-    front_wing: u8,
+    pub front_wing: u8,
 
     /// Rear wing aero.
-    rear_wing: u8,
+    pub rear_wing: u8,
 
     /// Differential adjustment on throttle (percentage).
-    on_throttle: u8,
+    pub on_throttle: u8,
 
     /// Differential adjustment off throttle (percentage).
-    off_throttle: u8,
+    pub off_throttle: u8,
 
     /// Front camber angle (suspension geometry).
-    front_camber: f32,
+    pub front_camber: f32,
 
     /// Rear camber angle (suspension geometry).
-    rear_camber: f32,
+    pub rear_camber: f32,
 
     /// Front toe angle (suspension geometry).
-    front_toe: f32,
+    pub front_toe: f32,
 
     /// Rear toe angle (suspension geometry).
-    rear_toe: f32,
+    pub rear_toe: f32,
 
     /// Front suspension setting.
-    front_suspension: u8,
+    pub front_suspension: u8,
 
     /// Rear suspension setting.
-    rear_suspension: u8,
+    pub rear_suspension: u8,
 
     /// Front anti-roll bar.
-    front_anti_roll_bar: u8,
+    pub front_anti_roll_bar: u8,
 
     /// Rear anti-roll bar.
-    rear_anti_roll_bar: u8,
+    pub rear_anti_roll_bar: u8,
 
     /// Front ride height.
-    front_suspension_height: u8,
+    pub front_suspension_height: u8,
 
     /// Rear right height.
-    rear_suspension_height: u8,
+    pub rear_suspension_height: u8,
 
     /// Brake pressure (percentage).
-    brake_pressure: u8,
+    pub brake_pressure: u8,
 
     /// Brake bias (percentage).
-    brake_bias: u8,
+    pub brake_bias: u8,
 
     /// Front tyre pressure (PSI).
-    front_tyre_pressure: f32,
+    pub front_tyre_pressure: f32,
 
     /// Rear tyre pressure (PSI).
-    rear_tyre_pressure: f32,
+    pub rear_tyre_pressure: f32,
 
     /// Ballast.
-    ballast: u8,
+    pub ballast: u8,
 
     /// Fuel load.
-    fuel_load: f32,
+    pub fuel_load: f32,
 }
 
+/// A packet with the setups of all cars in the session.
+///
+/// F1 2019 publishes the setups of all cars on track. In multiplayer sessions, the setups of other
+/// players will appear.
 pub struct CarSetupPacket {
     /// Each packet starts with a packet header.
     pub header: PacketHeader,
