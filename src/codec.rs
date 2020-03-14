@@ -1,9 +1,16 @@
+//! Codec for modern F1 games
+
 use crate::nineteen;
 use crate::packet::{FromBytes, Packet};
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 use tokio_util::codec::Decoder;
 
+/// Codec to decode UDP packets published by modern F1 games.
+///
+/// This struct implements the `Decoder` trait for tokio-utils. It can be used to decode incoming
+/// UDP packets, and convert them into internal data representations. The F1 codec can decode the
+/// packets of all F1 games that are supported by this library.
 pub struct F1Codec;
 
 impl Decoder for F1Codec {

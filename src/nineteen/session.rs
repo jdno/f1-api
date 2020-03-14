@@ -1,9 +1,15 @@
+//! Packet with general information about the session
+
 use crate::nineteen::{Flag, PacketHeader, VehicleIndex};
 use crate::packet::FromBytes;
 use bitflags::_core::convert::TryFrom;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
+/// The session's type of formula racing.
+///
+/// F1 2019 supports different kinds of formula racing. Besides modern F1 and
+/// classic F1, the game also features F2 racing.
 pub enum Formula {
     ModernF1 = 0,
     ClassicF1 = 1,
@@ -11,12 +17,18 @@ pub enum Formula {
     GenericF1 = 3,
 }
 
+/// The type of safety car configured for the session. Can be either a virtual or full safety car.
 pub enum SafetyCar {
     None = 0,
     Full = 1,
     Virtual = 2,
 }
 
+/// The type of the current session.
+///
+/// F1 knows many different types of sessions. A typical race weekend consists of free practice,
+/// qualifying and a race, each of which can be divided into multiple sessions (e.g. first or second
+/// free practice).
 pub enum Session {
     Unknown = 0,
     P1 = 1,
@@ -33,6 +45,7 @@ pub enum Session {
     TimeTrial = 12,
 }
 
+/// A list of all tracks in F1 2019.
 pub enum Track {
     Unknown = -1,
     Melbourne = 0,
@@ -62,6 +75,9 @@ pub enum Track {
     SuzukaShort = 24,
 }
 
+/// The weather in the session.
+///
+/// F1 2019 supports different types of weather, from a clear sky to heavy rain or thunderstorms.
 pub enum Weather {
     Clear = 0,
     LightCloud = 1,
@@ -71,15 +87,25 @@ pub enum Weather {
     Storm = 5,
 }
 
+/// A marshal zones around the track and its current flags.
+///
+/// A race track is divided into many marshal zones. In each zone, flags can be waved to inform
+/// drivers about hazards on track, faster cars approaching from behind, and other important status
+/// updates. Each zone is represented by a struct containing the fraction of the race track's length
+/// where the zone starts, and any flag that is currently being shown there.
 pub struct MarshalZone {
     /// Fraction of the racetrack's total length, marking the start of the
     /// marshal zone.
-    start: f32,
+    pub start: f32,
 
     /// The flag that is currently displayed in the marshal zone.
-    flag: Flag,
+    pub flag: Flag,
 }
 
+/// A packet with details about the current session.
+///
+/// The session packet provides information about the current session, for example weather and
+/// temperature as well as settings like the type of safety car in use.
 pub struct SessionPacket {
     /// Each packet starts with a packet header.
     pub header: PacketHeader,
@@ -88,55 +114,55 @@ pub struct SessionPacket {
     pub weather: Weather,
 
     /// Track temperature in degrees celsius.
-    track_temperature: i8,
+    pub track_temperature: i8,
 
     /// Air temperature in degrees celsius.
-    air_temperature: i8,
+    pub air_temperature: i8,
 
     /// Total number of laps in this race.
-    total_laps: u8,
+    pub total_laps: u8,
 
     /// Track length in metres.
-    track_length: u16,
+    pub track_length: u16,
 
     /// Type of the current session.
-    session_type: Session,
+    pub session_type: Session,
 
     /// Current track.
-    track: Track,
+    pub track: Track,
 
     /// Current type of formula.
-    formula: Formula,
+    pub formula: Formula,
 
     /// Time left in the session in seconds.
-    time_left: u16,
+    pub time_left: u16,
 
     /// Duration of the session in seconds.
-    duration: u16,
+    pub duration: u16,
 
     /// Pit speed limit in kilometers per hour
-    pit_speed_limit: u8,
+    pub pit_speed_limit: u8,
 
     /// Whether the game is paused.
-    game_paused: bool,
+    pub game_paused: bool,
 
     /// Whether the player is spectating.
-    is_spectating: bool,
+    pub is_spectating: bool,
 
     /// Index of the car being spectated.
-    spectator_car_index: VehicleIndex,
+    pub spectator_car_index: VehicleIndex,
 
     /// Whether the support for SLI Pro is active.
-    sli_pro_support: bool,
+    pub sli_pro_support: bool,
 
     /// Marshal zones around the track (maximum: 21).
-    marshal_zones: Vec<MarshalZone>,
+    pub marshal_zones: Vec<MarshalZone>,
 
     /// Type of safety car used in the session.
-    safety_car: SafetyCar,
+    pub safety_car: SafetyCar,
 
     /// Whether session is a multiplayer session.
-    network_session: bool,
+    pub network_session: bool,
 }
 
 impl TryFrom<u8> for Formula {

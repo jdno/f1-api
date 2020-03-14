@@ -1,9 +1,15 @@
+//! Packet with lap data for all 20 drivers in the session
+
 use crate::nineteen::PacketHeader;
 use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};
 
+/// The status each driver can have.
+///
+/// Each driver in the session has a status. The status indicates what the driver is currently
+/// doing, e.g. if he is in the garage or on track.
 pub enum DriverStatus {
     InGarage = 0,
     FlyingLap = 1,
@@ -12,12 +18,21 @@ pub enum DriverStatus {
     OnTrack = 4,
 }
 
+/// The status of a driver during a pit stop.
+///
+/// When a driver is pitting, a separate status is assigned to them. While the driver is on the pit
+/// lane, the status is `Pitting`. When the driver is on the pit area, it is `InPits`.
 pub enum PitStatus {
     None = 0,
     Pitting = 1,
     InPits = 2,
 }
 
+/// The status of a driver's results.
+///
+/// The results of a driver can have a different status, based on certain criteria of the session.
+/// A driver can get disqualified for rule infringements for example, or a driver might retire
+/// during a race.
 pub enum ResultStatus {
     Invalid = 0,
     Inactive = 1,
@@ -28,67 +43,78 @@ pub enum ResultStatus {
     Retired = 6,
 }
 
+/// The three sectors of a race track in F1.
 pub enum Sector {
     First = 0,
     Second = 1,
     Third = 2,
 }
 
+/// Data about a driver and their lap.
+///
+/// For each driver in the session, a set of lap data is published. It contains data on the current
+/// lap, e.g. the current lap time and the sector the driver is currently in, but also the time of
+/// the last and best laps, as well as the driver status.
 pub struct Lap {
     /// Last lap time in seconds.
-    last_lap_time: f32,
+    pub last_lap_time: f32,
 
     /// Current time around the lap in seconds.
-    curent_lap_time: f32,
+    pub current_lap_time: f32,
 
     /// Best lap time in the session in seconds.
-    best_lap_time: f32,
+    pub best_lap_time: f32,
 
     /// Time in sector 1 in seconds.
-    sector1_time: f32,
+    pub sector1_time: f32,
 
     /// Time in sector 2 in seconds.
-    sector2_time: f32,
+    pub sector2_time: f32,
 
     /// Distance the vehicle is around the current lap in meters. Can be
     /// negative if the car has not crossed the line yet (e.g. in qualifying).
-    lap_distance: f32,
+    pub lap_distance: f32,
 
     /// Total distance traveled in session in meters. Can be negative if the car
     /// has not crossed the line yet (e.g. in qualifying).
-    total_distance: f32,
+    pub total_distance: f32,
 
     /// Delta in seconds for safety car.
-    safety_car_delta: f32,
+    pub safety_car_delta: f32,
 
     /// Position of the car in the race.
-    position: u8,
+    pub position: u8,
 
     /// Number of the current lap.
-    current_lap_number: u8,
+    pub current_lap_number: u8,
 
     /// Pit status.
-    pit_status: PitStatus,
+    pub pit_status: PitStatus,
 
     /// Current sector.
-    sector: Sector,
+    pub sector: Sector,
 
     /// Whether the current lap is valid.
-    is_lap_valid: bool,
+    pub is_lap_valid: bool,
 
     /// Accumulated time penalties to be added in seconds.
-    penalties: u8,
+    pub penalties: u8,
 
     /// Grid position the vehicle started the race in.
-    grid_position: u8,
+    pub grid_position: u8,
 
     /// Driver status.
-    driver_status: DriverStatus,
+    pub driver_status: DriverStatus,
 
     /// Result status.
-    result_status: ResultStatus,
+    pub result_status: ResultStatus,
 }
 
+/// A packet with details about each driver's current lap.
+///
+/// F1 2019 publishes a lap packet with data in each driver in the session and their current status.
+/// The packet contains information about their current lap, e.g. their position on track and
+/// current lap time, but also data on the driver's best lap and their current status.
 pub struct LapPacket {
     /// Each packet starts with a packet header.
     pub header: PacketHeader,
@@ -182,7 +208,7 @@ impl FromBytes for LapPacket {
         for _ in 0..20 {
             laps.push(Lap {
                 last_lap_time: cursor.get_f32_le(),
-                curent_lap_time: cursor.get_f32_le(),
+                current_lap_time: cursor.get_f32_le(),
                 best_lap_time: cursor.get_f32_le(),
                 sector1_time: cursor.get_f32_le(),
                 sector2_time: cursor.get_f32_le(),
