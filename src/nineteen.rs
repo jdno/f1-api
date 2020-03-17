@@ -7,6 +7,7 @@
 //! The full API specification can be found here:
 //! https://forums.codemasters.com/topic/44592-f1-2019-udp-specification/
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen::event::EventPacket;
 use crate::nineteen::header::PacketType;
 use crate::nineteen::lap::LapPacket;
@@ -16,7 +17,6 @@ use crate::nineteen::session::SessionPacket;
 use crate::nineteen::setup::CarSetupPacket;
 use crate::nineteen::status::CarStatusPacket;
 use crate::nineteen::telemetry::TelemetryPacket;
-use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};

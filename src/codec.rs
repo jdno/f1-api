@@ -1,7 +1,8 @@
 //! Codec for modern F1 games
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen;
-use crate::packet::{FromBytes, Packet};
+use crate::packet::Packet;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 use tokio_util::codec::Decoder;

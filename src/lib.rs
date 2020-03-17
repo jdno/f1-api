@@ -10,6 +10,7 @@ use tokio::stream::{Stream, StreamExt};
 use tokio_util::udp::UdpFramed;
 
 pub mod codec;
+pub mod from_bytes;
 pub mod nineteen;
 pub mod packet;
 

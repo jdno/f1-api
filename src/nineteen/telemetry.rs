@@ -1,7 +1,7 @@
 //! Packet with the telemetry data of each car in the session
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen::PacketHeader;
-use crate::packet::FromBytes;
 use bitflags::bitflags;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;

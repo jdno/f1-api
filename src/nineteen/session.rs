@@ -1,7 +1,7 @@
 //! Packet with general information about the session
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen::{Flag, PacketHeader, VehicleIndex};
-use crate::packet::FromBytes;
 use bitflags::_core::convert::TryFrom;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
