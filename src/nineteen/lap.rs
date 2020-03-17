@@ -1,7 +1,7 @@
 //! Packet with lap data for all 20 drivers in the session
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen::PacketHeader;
-use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};

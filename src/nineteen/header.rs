@@ -1,7 +1,7 @@
 //! Packet header that prefixes each packet published by F1 2019
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen::VehicleIndex;
-use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};
@@ -112,8 +112,8 @@ impl FromBytes for PacketHeader {
 
 #[cfg(test)]
 mod tests {
+    use crate::from_bytes::FromBytes;
     use crate::nineteen::header::{PacketHeader, PacketType};
-    use crate::packet::FromBytes;
     use bytes::{BufMut, BytesMut};
     use std::io::{Cursor, ErrorKind};
 

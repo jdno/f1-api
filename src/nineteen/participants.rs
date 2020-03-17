@@ -1,7 +1,7 @@
 //! Packet with a list of all participants in a session
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen::PacketHeader;
-use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};
@@ -628,10 +628,10 @@ impl FromBytes for ParticipantsPacket {
 
 #[cfg(test)]
 mod tests {
+    use crate::from_bytes::FromBytes;
     use crate::nineteen::participants::{
         Controller, Driver, Nationality, ParticipantsPacket, Team, UdpSetting,
     };
-    use crate::packet::FromBytes;
     use bytes::{BufMut, BytesMut};
     use std::io::Cursor;
 

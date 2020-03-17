@@ -1,7 +1,7 @@
 //! Packet with motion data for all cars in the session
 
+use crate::from_bytes::FromBytes;
 use crate::nineteen::PacketHeader;
-use crate::packet::FromBytes;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error};
 
