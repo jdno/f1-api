@@ -2,6 +2,7 @@
 
 use crate::nineteen;
 
+pub mod event;
 pub mod header;
 
 /// A packet published by an F1 game.
