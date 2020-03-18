@@ -45,8 +45,8 @@ impl Display for GameVersion {
 /// to decode the packet correctly. Because it is only relevant for decoding the packet, the packet
 /// format, type, and version from the specifications are not republished.
 ///
-/// The header also contains information about the session and the version of the game. This
-/// information is republished, and can be found in every packet in the crate.
+/// The header also contains information about the session the packet belongs to, and about the time
+/// the packet was created.
 ///
 /// TODO Verify that the session tie can be represented as a duration
 #[derive(
