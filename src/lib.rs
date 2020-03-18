@@ -33,7 +33,7 @@ impl F1 {
     ///
     /// ```
     /// use f1_api::F1;
-    /// use f1_api::packet::Packet::Nineteen;
+    /// use f1_api::packet::Packet::{Event, Nineteen};
     /// use std::net::{IpAddr, SocketAddr};
     /// use tokio::stream::StreamExt;
     ///
@@ -46,6 +46,7 @@ impl F1 {
     ///
     ///     while let Some(packet) = stream.next().await {
     ///         match packet {
+    ///             Event(_) => println!("Received Event packet"),
     ///             Nineteen(packet) => println!("Received a packet from F1 2019")
     ///         }
     ///     }

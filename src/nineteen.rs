@@ -8,7 +8,6 @@
 //! https://forums.codemasters.com/topic/44592-f1-2019-udp-specification/
 
 use crate::from_bytes::FromBytes;
-use crate::nineteen::event::EventPacket;
 use crate::nineteen::header::PacketType;
 use crate::nineteen::lap::LapPacket;
 use crate::nineteen::motion::MotionPacket;
@@ -53,7 +52,6 @@ pub enum Flag {
 /// F1 2019 publishes different packets with different data at different intervals. Each packet is
 /// decoded to match an internal representation.
 pub enum Packet {
-    Event(EventPacket),
     Lap(LapPacket),
     Motion(MotionPacket),
     Participants(ParticipantsPacket),
@@ -114,7 +112,6 @@ impl FromBytes for Packet {
             PacketType::Motion => Packet::Motion(MotionPacket::from_bytes(cursor)?),
             PacketType::Session => Packet::Session(SessionPacket::from_bytes(cursor)?),
             PacketType::Lap => Packet::Lap(LapPacket::from_bytes(cursor)?),
-            PacketType::Event => Packet::Event(EventPacket::from_bytes(cursor)?),
             PacketType::Participants => {
                 Packet::Participants(ParticipantsPacket::from_bytes(cursor)?)
             }
