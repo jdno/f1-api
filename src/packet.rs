@@ -1,6 +1,7 @@
 //! Packet definitions
 
 use crate::nineteen;
+use crate::packet::event::EventPacket;
 
 pub mod event;
 pub mod header;
@@ -11,6 +12,10 @@ pub mod header;
 /// packets is decoded from UDP to their respective representation in this Rust crate. The `Packet`
 /// enum lists all packets that can be expected, and that a client should handle.
 pub enum Packet {
+    /// The F1 games send event packets whenever certain events occur in a session. Some event
+    /// packets carry a payload with more information about the event.
+    Event(EventPacket),
+
     /// Packet from F1 2019
     Nineteen(nineteen::Packet),
 }
