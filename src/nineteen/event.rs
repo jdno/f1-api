@@ -4,6 +4,7 @@
 //! which can carry a payload.
 
 use crate::nineteen::header::decode_header;
+use crate::packet::ensure_packet_size;
 use crate::packet::event::{
     Event, EventPacket, FastestLap, RaceWinner, Retirement, TeammateInPits,
 };
@@ -24,6 +25,8 @@ pub const PACKET_SIZE: usize = 32;
 /// identify the event. Based on this code the right decoding function is called, and a variant of
 /// the `EventPacket` is returned.
 pub fn decode_event(cursor: &mut Cursor<&mut BytesMut>) -> Result<EventPacket, Error> {
+    ensure_packet_size(PACKET_SIZE, cursor)?;
+
     let header = decode_header(cursor)?;
     let event_code = decode_event_code(cursor);
 
@@ -108,7 +111,16 @@ mod tests {
     }
 
     #[test]
-    fn from_bytes_with_ftlp_event() {
+    fn decode_event_with_error() {
+        let mut bytes = BytesMut::with_capacity(0);
+        let mut cursor = Cursor::new(&mut bytes);
+
+        let packet = decode_event(&mut cursor);
+        assert!(packet.is_err());
+    }
+
+    #[test]
+    fn decode_ftlp_event() {
         let bytes = BytesMut::with_capacity(PACKET_SIZE);
         let mut bytes = put_packet_header(bytes);
 
@@ -129,7 +141,7 @@ mod tests {
     }
 
     #[test]
-    fn from_bytes_with_ssta_event() {
+    fn decode_ssta_event() {
         let bytes = BytesMut::with_capacity(PACKET_SIZE);
         let mut bytes = put_packet_header(bytes);
 
