@@ -9,7 +9,6 @@
 
 use crate::from_bytes::FromBytes;
 use crate::nineteen::header::PacketType;
-use crate::nineteen::lap::LapPacket;
 use crate::nineteen::motion::MotionPacket;
 use crate::nineteen::participants::ParticipantsPacket;
 use crate::nineteen::session::SessionPacket;
@@ -52,7 +51,6 @@ pub enum Flag {
 /// F1 2019 publishes different packets with different data at different intervals. Each packet is
 /// decoded to match an internal representation.
 pub enum Packet {
-    Lap(LapPacket),
     Motion(MotionPacket),
     Participants(ParticipantsPacket),
     Session(SessionPacket),
@@ -111,7 +109,6 @@ impl FromBytes for Packet {
         let packet = match packet_type {
             PacketType::Motion => Packet::Motion(MotionPacket::from_bytes(cursor)?),
             PacketType::Session => Packet::Session(SessionPacket::from_bytes(cursor)?),
-            PacketType::Lap => Packet::Lap(LapPacket::from_bytes(cursor)?),
             PacketType::Participants => {
                 Packet::Participants(ParticipantsPacket::from_bytes(cursor)?)
             }

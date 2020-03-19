@@ -2,6 +2,7 @@
 
 use crate::nineteen;
 use crate::packet::event::EventPacket;
+use crate::packet::lap::LapPacket;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
@@ -18,6 +19,10 @@ pub enum Packet {
     /// The F1 games send event packets whenever certain events occur in a session. Some event
     /// packets carry a payload with more information about the event.
     Event(EventPacket),
+
+    /// Lap data packets provide information about each car in a session, and are sent at an
+    /// interval that can be configured in the game.
+    Lap(LapPacket),
 
     /// Packet from F1 2019
     Nineteen(nineteen::Packet),
