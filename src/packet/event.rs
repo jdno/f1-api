@@ -6,6 +6,7 @@
 
 use crate::packet::header::Header;
 use crate::packet::VehicleIndex;
+use derive_new::new;
 use getset::{CopyGetters, Getters};
 use std::fmt;
 use std::fmt::Display;
@@ -36,7 +37,7 @@ use std::time::Duration;
 /// }
 /// ```
 #[derive(
-    Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
+    new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
 )]
 pub struct FastestLap {
     /// Returns the index of the car achieving the fastest lap.
@@ -46,16 +47,6 @@ pub struct FastestLap {
     /// Returns the time of the fastest lap.
     #[getset(get = "pub")]
     time: Duration,
-}
-
-impl FastestLap {
-    /// Returns a new instance of the fastest lap payload.
-    pub fn new(vehicle_index: VehicleIndex, time: Duration) -> Self {
-        FastestLap {
-            vehicle_index,
-            time,
-        }
-    }
 }
 
 impl Display for FastestLap {
@@ -90,19 +81,12 @@ impl Display for FastestLap {
 /// }
 /// ```
 #[derive(
-    Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
+    new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
 )]
 pub struct Retirement {
     /// Returns the index of the car retiring.
     #[getset(get_copy = "pub")]
     vehicle_index: VehicleIndex,
-}
-
-impl Retirement {
-    /// Returns a new instance of a retirement payload.
-    pub fn new(vehicle_index: VehicleIndex) -> Self {
-        Retirement { vehicle_index }
-    }
 }
 
 impl Display for Retirement {
@@ -133,19 +117,12 @@ impl Display for Retirement {
 /// }
 /// ```
 #[derive(
-    Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
+    new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
 )]
 pub struct TeammateInPits {
     /// Returns the index of the teammate who has just entered the pits.
     #[getset(get_copy = "pub")]
     vehicle_index: VehicleIndex,
-}
-
-impl TeammateInPits {
-    /// Returns a new instance of a teammates in the pits payload.
-    pub fn new(vehicle_index: VehicleIndex) -> Self {
-        TeammateInPits { vehicle_index }
-    }
 }
 
 impl Display for TeammateInPits {
@@ -175,19 +152,12 @@ impl Display for TeammateInPits {
 /// }
 /// ```
 #[derive(
-    Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
+    new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
 )]
 pub struct RaceWinner {
     /// Returns the index of the car that has won the race.
     #[getset(get_copy = "pub")]
     vehicle_index: VehicleIndex,
-}
-
-impl RaceWinner {
-    /// Returns a new instance of the race winner payload.
-    pub fn new(vehicle_index: VehicleIndex) -> Self {
-        RaceWinner { vehicle_index }
-    }
 }
 
 impl Display for RaceWinner {
@@ -270,7 +240,7 @@ impl Display for Event {
 /// The modern F1 games send event packets with details about events that occur in a session. The
 /// frequency with which these packets are sent is not fixed, but rather packets are sent whenever
 /// events occur.
-#[derive(Debug, Getters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default)]
+#[derive(new, Debug, Getters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default)]
 pub struct EventPacket {
     /// Returns the packet header prefixing the event packet.
     #[getset(get = "pub")]
@@ -279,13 +249,6 @@ pub struct EventPacket {
     /// Returns the event from the event packet.
     #[getset(get = "pub")]
     event: Event,
-}
-
-impl EventPacket {
-    /// Returns a new instance of an event packet.
-    pub fn new(header: Header, event: Event) -> Self {
-        EventPacket { header, event }
-    }
 }
 
 impl Display for EventPacket {

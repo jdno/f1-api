@@ -1,6 +1,7 @@
 //! Header prefixing packets from modern F1 games
 
 use crate::packet::VehicleIndex;
+use derive_new::new;
 use getset::{CopyGetters, Getters};
 use std::fmt;
 use std::fmt::Display;
@@ -13,7 +14,7 @@ use std::time::Duration;
 ///
 /// TODO Test that partial order works correctly with version numbers
 #[derive(
-    Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
+    new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
 )]
 pub struct GameVersion {
     /// Returns the major version of the game.
@@ -23,13 +24,6 @@ pub struct GameVersion {
     /// Returns the minor version of the game.
     #[getset(get_copy = "pub")]
     minor: u8,
-}
-
-impl GameVersion {
-    /// Returns a new instance of a game version.
-    pub fn new(major: u8, minor: u8) -> Self {
-        GameVersion { major, minor }
-    }
 }
 
 impl Display for GameVersion {
@@ -50,7 +44,7 @@ impl Display for GameVersion {
 ///
 /// TODO Verify that the session tie can be represented as a duration
 #[derive(
-    Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
+    new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
 )]
 pub struct Header {
     /// Returns the version of the game.
@@ -75,25 +69,6 @@ pub struct Header {
     /// in these arrays the player's car has.
     #[getset(get_copy = "pub")]
     player_car_index: VehicleIndex,
-}
-
-impl Header {
-    /// Returns a new instance of the packet header.
-    pub fn new(
-        game_version: Option<GameVersion>,
-        session_uid: u64,
-        session_time: Duration,
-        frame_identifier: u32,
-        player_car_index: VehicleIndex,
-    ) -> Self {
-        Header {
-            game_version,
-            session_uid,
-            session_time,
-            frame_identifier,
-            player_car_index,
-        }
-    }
 }
 
 impl Display for Header {
