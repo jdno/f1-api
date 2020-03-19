@@ -169,7 +169,7 @@ pub struct Lap {
     /// control, or hitting objects or opponents can all invalidate a lap. This is crucial for
     /// qualifying, where invalid laps might not count for the results.
     #[getset(get_copy = "pub")]
-    is_lap_valid: bool,
+    is_valid_lap: bool,
 
     /// Returns the accumulated penalties for a car in seconds.
     #[getset(get_copy = "pub")]
@@ -192,7 +192,7 @@ pub struct Lap {
 ///
 /// The F1 games publish a lap packet that contains data on all 20 cars in a session. The packet is
 /// sent at a fixed interval that can be configured in the game.
-#[derive(new, Debug, Getters, PartialEq, Copy, Clone, PartialOrd, Default)]
+#[derive(new, Debug, Getters, PartialEq, Clone, PartialOrd, Default)]
 pub struct LapPacket {
     /// Returns the packet header prefixing the lap data packet.
     #[getset(get = "pub")]
@@ -200,5 +200,5 @@ pub struct LapPacket {
 
     /// Returns the laps for all 20 cars in a session.
     #[getset(get = "pub")]
-    laps: [Lap; 20],
+    laps: Vec<Lap>,
 }

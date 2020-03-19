@@ -47,7 +47,6 @@ pub fn decode_header(cursor: &mut Cursor<&mut BytesMut>) -> Result<Header, Error
 pub enum PacketType {
     Motion = 0,
     Session = 1,
-    Lap = 2,
     Participants = 4,
     Setup = 5,
     Telemetry = 6,
@@ -109,7 +108,6 @@ impl TryFrom<u8> for PacketType {
         match value {
             0 => Ok(PacketType::Motion),
             1 => Ok(PacketType::Session),
-            2 => Ok(PacketType::Lap),
             4 => Ok(PacketType::Participants),
             5 => Ok(PacketType::Setup),
             6 => Ok(PacketType::Telemetry),

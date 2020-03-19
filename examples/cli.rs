@@ -1,6 +1,6 @@
 use clap::{crate_version, App, Arg};
 use f1_api::nineteen::Packet;
-use f1_api::packet::Packet::{Event, Nineteen};
+use f1_api::packet::Packet::{Event, Lap, Nineteen};
 use f1_api::F1;
 use std::net::{IpAddr, SocketAddr};
 use std::str::FromStr;
@@ -39,8 +39,8 @@ async fn main() {
     while let Some(packet) = stream.next().await {
         match packet {
             Event(_) => println!("Received Event packet"),
+            Lap(_) => println!("Received Lap packet"),
             Nineteen(packet) => match packet {
-                Packet::Lap(_) => println!("Received Lap packet"),
                 Packet::Motion(_) => println!("Received Motion packet"),
                 Packet::Participants(_) => println!("Received Participants packet"),
                 Packet::Session(_) => println!("Received Session packet"),
