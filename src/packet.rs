@@ -5,6 +5,7 @@ use crate::packet::event::EventPacket;
 
 pub mod event;
 pub mod header;
+pub mod lap;
 
 /// A packet published by an F1 game.
 ///
