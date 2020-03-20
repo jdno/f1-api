@@ -71,7 +71,7 @@ pub struct MotionPacket {
 
     /// Returns the position of the suspension at each corner of the car.
     #[getset(get = "pub")]
-    suspension_positions: CornerProperty<f32>,
+    suspension_position: CornerProperty<f32>,
 
     /// Returns the velocity of the suspension at each corner of the car.
     #[getset(get = "pub")]

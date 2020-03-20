@@ -45,7 +45,6 @@ pub fn decode_header(cursor: &mut Cursor<&mut BytesMut>) -> Result<Header, Error
 /// TODO Remove enum once all packets have been migrated to unified packet format
 #[derive(Debug, PartialEq)]
 pub enum PacketType {
-    Motion = 0,
     Session = 1,
     Participants = 4,
     Setup = 5,
@@ -106,7 +105,6 @@ impl TryFrom<u8> for PacketType {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(PacketType::Motion),
             1 => Ok(PacketType::Session),
             4 => Ok(PacketType::Participants),
             5 => Ok(PacketType::Setup),
