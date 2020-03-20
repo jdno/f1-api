@@ -640,7 +640,7 @@ mod tests {
         bytes.put_u8(1);
         bytes.put_u8(2);
         bytes.put_u8(3);
-        bytes.put_u8(0);
+        bytes.put_u8(4);
         bytes.put_u64_le(u64::max_value());
         bytes.put_f32_le(1.0);
         bytes.put_u32_le(u32::max_value());

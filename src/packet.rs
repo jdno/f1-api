@@ -3,6 +3,7 @@
 use crate::nineteen;
 use crate::packet::event::EventPacket;
 use crate::packet::lap::LapPacket;
+use crate::packet::motion::MotionPacket;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
@@ -24,6 +25,10 @@ pub enum Packet {
     /// Lap data packets provide information about each car in a session, and are sent at an
     /// interval that can be configured in the game.
     Lap(LapPacket),
+
+    /// The motion data packet describes the movement and position of each car in the session, with
+    /// additional details being provided for the player's car.
+    Motion(MotionPacket),
 
     /// Packet from F1 2019
     Nineteen(nineteen::Packet),

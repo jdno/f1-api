@@ -1,177 +1,285 @@
-//! Packet with motion data for all cars in the session
+//! Decoder for motion packets sent by F1 2019
+//!
+//! The motion packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of the
+//! packet format is identical.
 
-use crate::from_bytes::FromBytes;
-use crate::nineteen::PacketHeader;
+use crate::nineteen::header::decode_header;
+use crate::packet::ensure_packet_size;
+use crate::packet::motion::{Motion, MotionPacket};
+use crate::types::{CornerProperty, Property3D};
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error};
 
-/// Public data describing the motion of each car in the session.
+/// Size of the motion packet in bytes
+pub const PACKET_SIZE: usize = 1343;
+
+/// Decode a motion packet sent by F1 2019
 ///
-/// F1 2019 publishes a limited set of motion data for each car in a session. This data contains the
-/// position of the car in the world, as all we its movement.
-pub struct CarMotion {
-    /// The position in the world on the X, Y, and Z axis.
-    pub world_position: (f32, f32, f32),
+/// F1 2018 and F1 2019 publish the same data in their motion packets, but with different packet
+/// headers.
+pub fn decode_motion(cursor: &mut Cursor<&mut BytesMut>) -> Result<MotionPacket, Error> {
+    ensure_packet_size(PACKET_SIZE, cursor)?;
 
-    /// The velocity in the world on the X, Y, and Z axis.
-    pub world_velocity: (f32, f32, f32),
+    let header = decode_header(cursor)?;
+    let mut cars = Vec::with_capacity(20);
 
-    /// The direction of the forward motion on the X, Y, and Z axis. This value
-    /// is normalized. To convert to float, divide by 32767.0f.
-    pub world_forward_direction: (i16, i16, i16),
-
-    /// The direction of lateral motion on the X, Y, and Z axis. This value is
-    /// normalized. To convert to float, divide by 32767.0f.
-    pub world_right_direction: (i16, i16, i16),
-
-    /// The G force, separated in its lateral, longitudinal, and vertical
-    /// components.
-    pub gforce: (f32, f32, f32),
-
-    /// The yaw angle of the car in radians.
-    pub yaw: f32,
-
-    /// The pitch angle of the car in radians.
-    pub pitch: f32,
-
-    /// The roll angle of the car in radians.
-    pub roll: f32,
-}
-
-/// A packet with motion data about each car in the session.
-///
-/// F1 2019 publishes motion data for all cars in the session. For most cars, this is restricted to
-/// publicly observable data, e.g. the position and movement of a car in the world. For the player's
-/// car, more motion data is published, e.g. various physical forces on the car and its suspension.
-pub struct MotionPacket {
-    /// Each packet starts with a packet header.
-    pub header: PacketHeader,
-
-    /// Motion data for all cars on track.
-    pub cars: Vec<CarMotion>,
-
-    /// Position of the suspension at the RL, RR, FL, FR.
-    pub suspension_positions: (f32, f32, f32, f32),
-
-    /// Velocity of the suspension at the RL, RR, FL, FR.
-    pub suspension_velocity: (f32, f32, f32, f32),
-
-    /// Acceleration of the suspension at the RL, RR, FL, FR.
-    pub suspension_acceleration: (f32, f32, f32, f32),
-
-    /// Wheel sped at the RL, RR, FL, FR.
-    pub wheel_speed: (f32, f32, f32, f32),
-
-    /// Wheel slip at the RL, RR, FL, FR.
-    pub wheel_slip: (f32, f32, f32, f32),
-
-    /// Velocity in local space on the X, Y, and Z axis.
-    pub local_velocity: (f32, f32, f32),
-
-    /// Angular velocity on the X, Y, and Z axis.
-    pub angular_velocity: (f32, f32, f32),
-
-    /// Angular acceleration on the X, Y, and Z axis.
-    pub angular_acceleration: (f32, f32, f32),
-
-    /// Current angle of the front wheels in radians.
-    pub front_wheels_angle: f32,
-}
-
-impl FromBytes for MotionPacket {
-    fn buffer_size() -> usize {
-        1343
+    for _ in 0..20 {
+        cars.push(Motion::new(
+            decode_position(cursor),
+            decode_velocity(cursor),
+            decode_forward_direction(cursor),
+            decode_right_direction(cursor),
+            decode_g_force(cursor),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+        ))
     }
 
-    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
-    where
-        Self: Sized,
-    {
-        let header = PacketHeader::decode(cursor)?;
-        let mut cars = Vec::with_capacity(20);
+    Ok(MotionPacket::new(
+        header,
+        cars,
+        decode_suspension_position(cursor),
+        decode_suspension_velocity(cursor),
+        decode_suspension_acceleration(cursor),
+        decode_wheel_speed(cursor),
+        decode_wheel_slip(cursor),
+        decode_local_velocity(cursor),
+        decode_angular_velocity(cursor),
+        decode_angular_acceleration(cursor),
+        cursor.get_f32_le(),
+    ))
+}
 
-        for _ in 0..20 {
-            cars.push(CarMotion {
-                world_position: (
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                ),
-                world_velocity: (
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                ),
-                world_forward_direction: (
-                    cursor.get_i16_le(),
-                    cursor.get_i16_le(),
-                    cursor.get_i16_le(),
-                ),
-                world_right_direction: (
-                    cursor.get_i16_le(),
-                    cursor.get_i16_le(),
-                    cursor.get_i16_le(),
-                ),
-                gforce: (
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                ),
-                yaw: cursor.get_f32_le(),
-                pitch: cursor.get_f32_le(),
-                roll: cursor.get_f32_le(),
-            })
-        }
+/// Decode position of the car
+fn decode_position(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<f32> {
+    Property3D::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
 
-        Ok(MotionPacket {
-            header,
-            cars,
-            suspension_positions: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            suspension_velocity: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            suspension_acceleration: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            wheel_speed: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            wheel_slip: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            local_velocity: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            angular_velocity: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            angular_acceleration: (
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-                cursor.get_f32_le(),
-            ),
-            front_wheels_angle: cursor.get_f32_le(),
-        })
+/// Decode velocity of the car
+fn decode_velocity(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<f32> {
+    Property3D::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode forward direction of the car
+fn decode_forward_direction(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<i16> {
+    Property3D::new(
+        cursor.get_i16_le(),
+        cursor.get_i16_le(),
+        cursor.get_i16_le(),
+    )
+}
+
+/// Decode right direction of the car
+fn decode_right_direction(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<i16> {
+    Property3D::new(
+        cursor.get_i16_le(),
+        cursor.get_i16_le(),
+        cursor.get_i16_le(),
+    )
+}
+
+/// Decode G forces on the car
+fn decode_g_force(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<f32> {
+    Property3D::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode suspension position of the player's car
+fn decode_suspension_position(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<f32> {
+    CornerProperty::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode suspension velocity of the player's car
+fn decode_suspension_velocity(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<f32> {
+    CornerProperty::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode suspension acceleration of the player's car
+fn decode_suspension_acceleration(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<f32> {
+    CornerProperty::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode the wheel speed of the player's car
+fn decode_wheel_speed(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<f32> {
+    CornerProperty::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode the wheel slip of the player's car
+fn decode_wheel_slip(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<f32> {
+    CornerProperty::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode the local velocity of the player's car
+fn decode_local_velocity(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<f32> {
+    Property3D::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+/// Decode the angular velocity of the player's car
+fn decode_angular_velocity(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<f32> {
+    Property3D::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+/// Decode the angular acceleration of the player's car
+fn decode_angular_acceleration(cursor: &mut Cursor<&mut BytesMut>) -> Property3D<f32> {
+    Property3D::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::nineteen::motion::{decode_motion, PACKET_SIZE};
+    use assert_approx_eq::assert_approx_eq;
+    use bytes::{BufMut, BytesMut};
+    use std::io::Cursor;
+
+    fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
+        bytes.put_u16_le(2019);
+        bytes.put_u8(1);
+        bytes.put_u8(2);
+        bytes.put_u8(3);
+        bytes.put_u8(0);
+        bytes.put_u64_le(u64::max_value());
+        bytes.put_f32_le(1.0);
+        bytes.put_u32_le(u32::max_value());
+        bytes.put_u8(0);
+
+        bytes
+    }
+
+    #[test]
+    fn decode_motion_with_error() {
+        let mut bytes = BytesMut::with_capacity(0);
+        let mut cursor = Cursor::new(&mut bytes);
+
+        let packet = decode_motion(&mut cursor);
+        assert!(packet.is_err());
+    }
+
+    #[test]
+    fn decode_motion_with_success() {
+        let mut bytes = BytesMut::with_capacity(PACKET_SIZE);
+        bytes = put_packet_header(bytes);
+
+        bytes.put_f32_le(1.0);
+        bytes.put_f32_le(2.0);
+        bytes.put_f32_le(3.0);
+        bytes.put_f32_le(4.0);
+        bytes.put_f32_le(5.0);
+        bytes.put_f32_le(6.0);
+        bytes.put_i16_le(7);
+        bytes.put_i16_le(8);
+        bytes.put_i16_le(9);
+        bytes.put_i16_le(10);
+        bytes.put_i16_le(11);
+        bytes.put_i16_le(12);
+        bytes.put_f32_le(13.0);
+        bytes.put_f32_le(14.0);
+        bytes.put_f32_le(15.0);
+        bytes.put_f32_le(16.0);
+        bytes.put_f32_le(17.0);
+        bytes.put_f32_le(18.0);
+
+        let padding = vec![0u8; 1140];
+        bytes.put(padding.as_slice());
+
+        bytes.put_f32_le(19.0);
+        bytes.put_f32_le(20.0);
+        bytes.put_f32_le(21.0);
+        bytes.put_f32_le(22.0);
+        bytes.put_f32_le(23.0);
+        bytes.put_f32_le(24.0);
+        bytes.put_f32_le(25.0);
+        bytes.put_f32_le(26.0);
+        bytes.put_f32_le(27.0);
+        bytes.put_f32_le(28.0);
+        bytes.put_f32_le(29.0);
+        bytes.put_f32_le(30.0);
+        bytes.put_f32_le(31.0);
+        bytes.put_f32_le(32.0);
+        bytes.put_f32_le(33.0);
+        bytes.put_f32_le(34.0);
+        bytes.put_f32_le(35.0);
+        bytes.put_f32_le(36.0);
+        bytes.put_f32_le(37.0);
+        bytes.put_f32_le(38.0);
+        bytes.put_f32_le(39.0);
+        bytes.put_f32_le(40.0);
+        bytes.put_f32_le(41.0);
+        bytes.put_f32_le(42.0);
+        bytes.put_f32_le(43.0);
+        bytes.put_f32_le(44.0);
+        bytes.put_f32_le(45.0);
+        bytes.put_f32_le(46.0);
+        bytes.put_f32_le(47.0);
+        bytes.put_f32_le(48.0);
+
+        let mut cursor = Cursor::new(&mut bytes);
+        let packet = decode_motion(&mut cursor).unwrap();
+
+        let motion = packet.cars()[0];
+        assert_approx_eq!(1.0, motion.position().x());
+        assert_approx_eq!(4.0, motion.velocity().x());
+        assert_eq!(7, motion.forward_direction().x());
+        assert_eq!(10, motion.right_direction().x());
+        assert_approx_eq!(13.0, motion.g_force().x());
+        assert_approx_eq!(16.0, motion.yaw());
+        assert_approx_eq!(17.0, motion.pitch());
+        assert_approx_eq!(18.0, motion.roll());
+        assert_approx_eq!(19.0, packet.suspension_position().front_left());
+        assert_approx_eq!(23.0, packet.suspension_velocity().front_left());
+        assert_approx_eq!(27.0, packet.suspension_acceleration().front_left());
+        assert_approx_eq!(31.0, packet.wheel_speed().front_left());
+        assert_approx_eq!(35.0, packet.wheel_slip().front_left());
+        assert_approx_eq!(39.0, packet.local_velocity().x());
+        assert_approx_eq!(42.0, packet.angular_velocity().x());
+        assert_approx_eq!(45.0, packet.angular_acceleration().x());
+        assert_approx_eq!(48.0, packet.front_wheels_angle());
     }
 }
