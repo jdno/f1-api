@@ -4,6 +4,7 @@ use crate::nineteen;
 use crate::packet::event::EventPacket;
 use crate::packet::lap::LapPacket;
 use crate::packet::motion::MotionPacket;
+use crate::packet::participants::ParticipantsPacket;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
@@ -30,6 +31,10 @@ pub enum Packet {
     /// The motion data packet describes the movement and position of each car in the session, with
     /// additional details being provided for the player's car.
     Motion(MotionPacket),
+
+    /// Packet with information on all participants in the session, for example their name, team,
+    /// and nationality.
+    Participants(ParticipantsPacket),
 
     /// Packet from F1 2019
     Nineteen(nineteen::Packet),
