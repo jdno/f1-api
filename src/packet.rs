@@ -5,6 +5,7 @@ use crate::packet::event::EventPacket;
 use crate::packet::lap::LapPacket;
 use crate::packet::motion::MotionPacket;
 use crate::packet::participants::ParticipantsPacket;
+use crate::packet::session::SessionPacket;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
@@ -36,6 +37,9 @@ pub enum Packet {
     /// Packet with information on all participants in the session, for example their name, team,
     /// and nationality.
     Participants(ParticipantsPacket),
+
+    /// The F1 games provide information about the current session on a regular basis.
+    Session(SessionPacket),
 
     /// Packet from F1 2019
     Nineteen(nineteen::Packet),
