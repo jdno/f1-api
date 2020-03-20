@@ -5,7 +5,7 @@
 //! payload that further defines the event, and that are declared in this module as structs.
 
 use crate::packet::header::Header;
-use crate::packet::VehicleIndex;
+use crate::types::VehicleIndex;
 use derive_new::new;
 use getset::{CopyGetters, Getters};
 use std::fmt;

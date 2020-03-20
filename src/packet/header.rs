@@ -1,6 +1,6 @@
 //! Header prefixing packets from modern F1 games
 
-use crate::packet::VehicleIndex;
+use crate::types::VehicleIndex;
 use derive_new::new;
 use getset::{CopyGetters, Getters};
 use std::fmt;

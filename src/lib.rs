@@ -13,6 +13,7 @@ pub mod codec;
 pub mod from_bytes;
 pub mod nineteen;
 pub mod packet;
+pub mod types;
 
 /// A high-level interface to the telemetry data of modern F1 video games.
 ///
