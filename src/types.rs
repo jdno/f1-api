@@ -1,5 +1,29 @@
+//! Collection of auxiliary types that are used throughout the crate
+
 use derive_new::new;
 use getset::CopyGetters;
+
+/// Flags shown in formula racing
+///
+/// Flags are an essential tool to communicate the status of a race to the drivers on track. A green
+/// flag signals the race start or restart, while a yellow flag warns of hazards on track. The red
+/// flag aborts a race or session. The blue flag signals that a faster car is approaching from
+/// behind.
+#[derive(Debug, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash)]
+pub enum Flag {
+    Invalid,
+    None,
+    Green,
+    Blue,
+    Yellow,
+    Red,
+}
+
+impl Default for Flag {
+    fn default() -> Self {
+        Flag::None
+    }
+}
 
 /// Reference to a vehicle in a packet
 ///
