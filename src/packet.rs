@@ -9,6 +9,7 @@ use std::io::{Cursor, Error, ErrorKind};
 pub mod event;
 pub mod header;
 pub mod lap;
+pub mod motion;
 
 /// A packet published by an F1 game.
 ///
