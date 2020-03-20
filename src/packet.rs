@@ -28,14 +28,6 @@ pub enum Packet {
     Nineteen(nineteen::Packet),
 }
 
-/// Reference to a vehicle in a packet
-///
-/// In Formula 1, a maximum of 20 cars can participate in any session. The modern F1 games use this
-/// rule to use arrays with a static size of 20 whenever they publish data about all vehicles in a
-/// session. Data in those arrays is referenced using an unsigned byte. By defining a type alias for
-/// the indices, their usage can be checked by the Rust compiler.
-pub type VehicleIndex = u8;
-
 /// Ensure a packet has the expected size
 ///
 /// Modern F1 games send their packets over UDP. Depending on their size, these packets might be
