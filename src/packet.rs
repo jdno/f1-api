@@ -13,6 +13,7 @@ pub mod header;
 pub mod lap;
 pub mod motion;
 pub mod participants;
+pub mod session;
 
 /// A packet published by an F1 game.
 ///
