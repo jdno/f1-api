@@ -1,9 +1,13 @@
 //! Decoder for header prefixing packets sent by F1 2019
 
+use crate::packet::ensure_packet_size;
 use crate::packet::header::{GameVersion, Header};
 use bitflags::_core::time::Duration;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error};
+
+/// Size of the packet header in F1 2019
+pub const HEADER_SIZE: usize = 23;
 
 /// Decode the header prefixing packets sent by F1 2019
 ///
@@ -12,6 +16,8 @@ use std::io::{Cursor, Error};
 /// The latter is extracted from the header and returned to the caller. The technical details are
 /// dropped, since their information is encoded in the type system once the packet has been decoded.
 pub fn decode_header(cursor: &mut Cursor<&mut BytesMut>) -> Result<Header, Error> {
+    ensure_packet_size(HEADER_SIZE, cursor)?;
+
     cursor.get_u16_le(); // Move cursor past packet format
 
     let game_version = Some(GameVersion::new(cursor.get_u8(), cursor.get_u8()));
@@ -35,10 +41,9 @@ pub fn decode_header(cursor: &mut Cursor<&mut BytesMut>) -> Result<Header, Error
 
 #[cfg(test)]
 mod tests {
+    use crate::nineteen::header::HEADER_SIZE;
     use bytes::{BufMut, BytesMut};
     use std::io::Cursor;
-
-    const HEADER_SIZE: usize = 23;
 
     #[test]
     fn decode_header() {
