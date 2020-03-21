@@ -1,7 +1,5 @@
 //! Codec for modern F1 games
 
-use crate::from_bytes::FromBytes;
-use crate::nineteen;
 use crate::packet::Packet;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
@@ -47,8 +45,7 @@ impl Decoder for F1Codec {
 
         let packet_format = cursor.get_u16_le();
 
-        let packet = match packet_format {
-            2019 => nineteen::Packet::from_bytes(&mut cursor),
+        let packet: Result<(), Error> = match packet_format {
             format => Err(Error::new(
                 ErrorKind::InvalidData,
                 format!("Unknown packet format {}.", format),
@@ -56,10 +53,7 @@ impl Decoder for F1Codec {
         };
 
         match packet {
-            Ok(packet) => {
-                cursor.into_inner().clear();
-                Ok(Some(Packet::Nineteen(packet)))
-            }
+            Ok(_) => Ok(None),
             Err(error) => match error.kind() {
                 // Signal more bytes are expected
                 ErrorKind::UnexpectedEof => Ok(None),

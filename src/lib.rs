@@ -10,7 +10,6 @@ use tokio::stream::{Stream, StreamExt};
 use tokio_util::udp::UdpFramed;
 
 pub mod codec;
-pub mod from_bytes;
 pub mod nineteen;
 pub mod packet;
 pub mod types;
@@ -34,7 +33,7 @@ impl F1 {
     ///
     /// ```
     /// use f1_api::F1;
-    /// use f1_api::packet::Packet::{Event, Lap, Motion, Nineteen, Participants, Session, Setup, Status};
+    /// use f1_api::packet::Packet::{Event, Lap, Motion, Participants, Session, Setup, Status, Telemetry};
     /// use std::net::{IpAddr, SocketAddr};
     /// use tokio::stream::StreamExt;
     ///
@@ -54,7 +53,7 @@ impl F1 {
     ///             Session(_) => println!("Received Session packet"),
     ///             Setup(_) => println!("Received Setup packet"),
     ///             Status(_) => println!("Received Status packet"),
-    ///             Nineteen(packet) => println!("Received a packet from F1 2019")
+    ///             Telemetry(_) => println!("Received Telemetry packet"),
     ///         }
     ///     }
     /// }
