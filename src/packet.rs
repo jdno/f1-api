@@ -1,13 +1,9 @@
-//! Packet definitions
+//! Packets that are sent by modern F1 games
+//!
+//! This library implements a single packet format for all the F1 games it supports. The API
+//! specification has been slowly evolving from game to game, but without such significant changes
+//! that it would require a different packet format.
 
-use crate::nineteen;
-use crate::packet::event::EventPacket;
-use crate::packet::lap::LapPacket;
-use crate::packet::motion::MotionPacket;
-use crate::packet::participants::ParticipantsPacket;
-use crate::packet::session::SessionPacket;
-use crate::packet::setup::CarSetupPacket;
-use crate::packet::status::CarStatusPacket;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
@@ -26,36 +22,37 @@ pub mod telemetry;
 /// The F1 games publish different packets with different data at different intervals. Each of these
 /// packets is decoded from UDP to their respective representation in this Rust crate. The `Packet`
 /// enum lists all packets that can be expected, and that a client should handle.
+#[derive(Debug, PartialEq, Clone, PartialOrd)]
 pub enum Packet {
     /// The F1 games send event packets whenever certain events occur in a session. Some event
     /// packets carry a payload with more information about the event.
-    Event(EventPacket),
+    Event(event::EventPacket),
 
     /// Lap data packets provide information about each car in a session, and are sent at an
     /// interval that can be configured in the game.
-    Lap(LapPacket),
+    Lap(lap::LapPacket),
 
     /// The motion data packet describes the movement and position of each car in the session, with
     /// additional details being provided for the player's car.
-    Motion(MotionPacket),
+    Motion(motion::MotionPacket),
 
     /// Packet with information on all participants in the session, for example their name, team,
     /// and nationality.
-    Participants(ParticipantsPacket),
+    Participants(participants::ParticipantsPacket),
 
     /// The F1 games provide information about the current session on a regular basis.
-    Session(SessionPacket),
+    Session(session::SessionPacket),
 
     /// Car setup packets publish the setup of each car in the session. In multiplayer sessions, the
     /// setups of other player's cars are redacted to enable a fair competition.
-    Setup(CarSetupPacket),
+    Setup(setup::CarSetupPacket),
 
     /// The F1 games send packets with data about the status of each car in a session at a
     /// configurable interval.
-    Status(CarStatusPacket),
+    Status(status::CarStatusPacket),
 
-    /// Packet from F1 2019
-    Nineteen(nineteen::Packet),
+    /// Telemetry data is provided for all cars in the session.
+    Telemetry(telemetry::TelemetryPacket),
 }
 
 /// Ensure a packet has the expected size

@@ -7,15 +7,7 @@
 //! The full API specification can be found here:
 //! https://forums.codemasters.com/topic/44592-f1-2019-udp-specification/
 
-use crate::from_bytes::FromBytes;
-use crate::nineteen::header::PacketType;
-use crate::nineteen::telemetry::TelemetryPacket;
-use bytes::{Buf, BytesMut};
-use std::convert::TryFrom;
-use std::io::{Cursor, Error, ErrorKind};
-
 mod header;
-pub use header::PacketHeader;
 
 pub mod event;
 pub mod flag;
@@ -42,65 +34,8 @@ pub enum Flag {
     Red = 4,
 }
 
-/// A packet published by F1 2019.
+/// Index referencing a car in the packet payloads
 ///
-/// F1 2019 publishes different packets with different data at different intervals. Each packet is
-/// decoded to match an internal representation.
-pub enum Packet {
-    Telemetry(TelemetryPacket),
-}
-
 /// Data for all vehicles is provided as an array. References to the data in
 /// this array are made in the form of a vehicle index.
 pub type VehicleIndex = u8;
-
-impl TryFrom<i8> for Flag {
-    type Error = Error;
-
-    fn try_from(value: i8) -> Result<Self, Self::Error> {
-        match value {
-            -1 => Ok(Flag::Invalid),
-            0 => Ok(Flag::None),
-            1 => Ok(Flag::Green),
-            2 => Ok(Flag::Blue),
-            3 => Ok(Flag::Yellow),
-            4 => Ok(Flag::Red),
-            _ => Err(Error::new(ErrorKind::InvalidData, "Failed to decode flag.")),
-        }
-    }
-}
-
-impl Packet {
-    /// Peek into the packet to determine the packet type.
-    ///
-    /// The packet contains an id in its header that identifies the type of the packet. To be able
-    /// to properly parse the packet, its type must be known beforehand. Using this function, the
-    /// packet id can be retrieved from the packet without modifying the cursor.
-    fn peek_packet_id(cursor: &mut Cursor<&mut BytesMut>) -> Result<PacketType, Error> {
-        cursor.set_position(5 as u64);
-
-        let packet_type = PacketType::try_from(cursor.get_u8())?;
-
-        cursor.set_position(0);
-        Ok(packet_type)
-    }
-}
-
-impl FromBytes for Packet {
-    fn buffer_size() -> usize {
-        6
-    }
-
-    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
-    where
-        Self: Sized,
-    {
-        let packet_type = Packet::peek_packet_id(cursor)?;
-
-        let packet = match packet_type {
-            PacketType::Telemetry => Packet::Telemetry(TelemetryPacket::from_bytes(cursor)?),
-        };
-
-        Ok(packet)
-    }
-}
