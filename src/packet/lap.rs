@@ -192,7 +192,7 @@ pub struct Lap {
 ///
 /// The F1 games publish a lap packet that contains data on all 20 cars in a session. The packet is
 /// sent at a fixed interval that can be configured in the game.
-#[derive(new, Debug, Getters, PartialEq, Clone, PartialOrd, Default)]
+#[derive(new, Debug, Getters, PartialEq, Clone, PartialOrd)]
 pub struct LapPacket {
     /// Returns the packet header prefixing the lap data packet.
     #[getset(get = "pub")]

@@ -240,7 +240,7 @@ impl Display for Event {
 /// The modern F1 games send event packets with details about events that occur in a session. The
 /// frequency with which these packets are sent is not fixed, but rather packets are sent whenever
 /// events occur.
-#[derive(new, Debug, Getters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default)]
+#[derive(new, Debug, Getters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash)]
 pub struct EventPacket {
     /// Returns the packet header prefixing the event packet.
     #[getset(get = "pub")]

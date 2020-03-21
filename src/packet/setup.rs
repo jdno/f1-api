@@ -100,7 +100,7 @@ pub struct CarSetup {
 /// The F1 games publish the setup of each car in the session in the car setup packet. In
 /// multiplayer sessions, the setups of other players are redacted to prevent anyone from gaining an
 /// unfair advantage.
-#[derive(new, Debug, Getters, PartialEq, Clone, PartialOrd, Default)]
+#[derive(new, Debug, Getters, PartialEq, Clone, PartialOrd)]
 pub struct CarSetupPacket {
     /// Returns the packet header prefixing the car setup packet.
     #[getset(get = "pub")]

@@ -153,7 +153,7 @@ pub struct MarshalZone {
 ///
 /// The session packet provides information about the current session, for example weather and
 /// temperature as well as settings like the type of safety car in use.
-#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, PartialOrd, Default)]
+#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, PartialOrd)]
 #[allow(clippy::too_many_arguments)]
 pub struct SessionPacket {
     /// Returns the packet header prefixing the session packet.

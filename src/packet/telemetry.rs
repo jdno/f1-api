@@ -159,7 +159,7 @@ pub struct Telemetry {
 ///
 /// The F1 games publish telemetry data for each car in the session. The telemetry data includes
 /// parameters such as the car's speed, as well as information in controller inputs from the user.
-#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, PartialOrd, Default)]
+#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, PartialOrd)]
 pub struct TelemetryPacket {
     /// Returns the packet header prefixing the telemetry packet.
     #[getset(get = "pub")]

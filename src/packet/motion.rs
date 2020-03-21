@@ -58,7 +58,7 @@ pub struct Motion {
 /// publicly observable properties for most cars, e.g. the position and movement of a car. For the
 /// player's car, additional motion data is published, e.g. various physical forces on the car and
 /// its suspension.
-#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, PartialOrd, Default)]
+#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, PartialOrd)]
 #[allow(clippy::too_many_arguments)]
 pub struct MotionPacket {
     /// Returns the packet header prefixing the motion packet.
