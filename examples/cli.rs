@@ -1,6 +1,6 @@
 use clap::{crate_version, App, Arg};
 use f1_api::nineteen::Packet;
-use f1_api::packet::Packet::{Event, Lap, Motion, Nineteen, Participants, Session, Setup};
+use f1_api::packet::Packet::{Event, Lap, Motion, Nineteen, Participants, Session, Setup, Status};
 use f1_api::F1;
 use std::net::{IpAddr, SocketAddr};
 use std::str::FromStr;
@@ -44,9 +44,9 @@ async fn main() {
             Participants(_) => println!("Received Participants packet"),
             Session(_) => println!("Received Session packet"),
             Setup(_) => println!("Received Setup packet"),
+            Status(_) => println!("Received Status packet"),
             Nineteen(packet) => match packet {
                 Packet::Telemetry(_) => println!("Received Telemetry packet"),
-                Packet::Status(_) => println!("Received Status packet"),
             },
         }
     }
