@@ -1,126 +1,138 @@
-//! Packet with the setups of all cars in the session
+//! Decoder for car setup packets sent by F1 2019
+//!
+//! The car setup packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of
+//! the packet format is identical.
 
-use crate::from_bytes::FromBytes;
-use crate::nineteen::PacketHeader;
+use crate::nineteen::header::decode_header;
+use crate::packet::ensure_packet_size;
+use crate::packet::setup::{CarSetup, CarSetupPacket};
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error};
 
-/// A setup of an F1 race car.
+/// Size of the car setups packet in bytes
+pub const PACKET_SIZE: usize = 843;
+
+/// Decode a car setup packet sent by F1 2019
 ///
-/// The setup of the race cars in F1 2019 can be modified to improve the handling of the car on a
-/// particular race track. The setup consists of a set of parameters that can be adjusted.
-pub struct CarSetup {
-    /// Front wing aero.
-    pub front_wing: u8,
+/// F1 2018 and F1 2019 publish the same data in their car setup packets, but with different packet
+/// headers. In multiplayer sessions, the setups of other players are redacted and appear empty.
+pub fn decode_setups(cursor: &mut Cursor<&mut BytesMut>) -> Result<CarSetupPacket, Error> {
+    ensure_packet_size(PACKET_SIZE, cursor)?;
 
-    /// Rear wing aero.
-    pub rear_wing: u8,
+    let header = decode_header(cursor)?;
+    let mut setups = Vec::with_capacity(20);
 
-    /// Differential adjustment on throttle (percentage).
-    pub on_throttle: u8,
-
-    /// Differential adjustment off throttle (percentage).
-    pub off_throttle: u8,
-
-    /// Front camber angle (suspension geometry).
-    pub front_camber: f32,
-
-    /// Rear camber angle (suspension geometry).
-    pub rear_camber: f32,
-
-    /// Front toe angle (suspension geometry).
-    pub front_toe: f32,
-
-    /// Rear toe angle (suspension geometry).
-    pub rear_toe: f32,
-
-    /// Front suspension setting.
-    pub front_suspension: u8,
-
-    /// Rear suspension setting.
-    pub rear_suspension: u8,
-
-    /// Front anti-roll bar.
-    pub front_anti_roll_bar: u8,
-
-    /// Rear anti-roll bar.
-    pub rear_anti_roll_bar: u8,
-
-    /// Front ride height.
-    pub front_suspension_height: u8,
-
-    /// Rear right height.
-    pub rear_suspension_height: u8,
-
-    /// Brake pressure (percentage).
-    pub brake_pressure: u8,
-
-    /// Brake bias (percentage).
-    pub brake_bias: u8,
-
-    /// Front tyre pressure (PSI).
-    pub front_tyre_pressure: f32,
-
-    /// Rear tyre pressure (PSI).
-    pub rear_tyre_pressure: f32,
-
-    /// Ballast.
-    pub ballast: u8,
-
-    /// Fuel load.
-    pub fuel_load: f32,
-}
-
-/// A packet with the setups of all cars in the session.
-///
-/// F1 2019 publishes the setups of all cars on track. In multiplayer sessions, the setups of other
-/// players will appear.
-pub struct CarSetupPacket {
-    /// Each packet starts with a packet header.
-    pub header: PacketHeader,
-
-    /// The setup for each car in the session. In multiplayer sessions, the
-    /// setup for the cars of other players will appear empty.
-    pub setups: Vec<CarSetup>,
-}
-
-impl FromBytes for CarSetupPacket {
-    fn buffer_size() -> usize {
-        843
+    for _ in 0..20 {
+        setups.push(CarSetup::new(
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_u8(),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+            cursor.get_u8(),
+            cursor.get_f32_le(),
+        ))
     }
 
-    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
-    where
-        Self: Sized,
-    {
-        let header = PacketHeader::decode(cursor)?;
-        let mut setups = Vec::with_capacity(20);
+    Ok(CarSetupPacket::new(header, setups))
+}
 
-        for _ in 0..20 {
-            setups.push(CarSetup {
-                front_wing: cursor.get_u8(),
-                rear_wing: cursor.get_u8(),
-                on_throttle: cursor.get_u8(),
-                off_throttle: cursor.get_u8(),
-                front_camber: cursor.get_f32_le(),
-                rear_camber: cursor.get_f32_le(),
-                front_toe: cursor.get_f32_le(),
-                rear_toe: cursor.get_f32_le(),
-                front_suspension: cursor.get_u8(),
-                rear_suspension: cursor.get_u8(),
-                front_anti_roll_bar: cursor.get_u8(),
-                rear_anti_roll_bar: cursor.get_u8(),
-                front_suspension_height: cursor.get_u8(),
-                rear_suspension_height: cursor.get_u8(),
-                brake_pressure: cursor.get_u8(),
-                brake_bias: cursor.get_u8(),
-                front_tyre_pressure: cursor.get_f32_le(),
-                rear_tyre_pressure: cursor.get_f32_le(),
-                ballast: cursor.get_u8(),
-                fuel_load: cursor.get_f32_le(),
-            })
-        }
+#[cfg(test)]
+mod tests {
+    use crate::nineteen::setup::{decode_setups, PACKET_SIZE};
+    use assert_approx_eq::assert_approx_eq;
+    use bytes::{BufMut, BytesMut};
+    use std::io::Cursor;
 
-        Ok(CarSetupPacket { header, setups })
+    fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
+        bytes.put_u16_le(2019);
+        bytes.put_u8(1);
+        bytes.put_u8(2);
+        bytes.put_u8(3);
+        bytes.put_u8(5);
+        bytes.put_u64_le(u64::max_value());
+        bytes.put_f32_le(1.0);
+        bytes.put_u32_le(u32::max_value());
+        bytes.put_u8(0);
+
+        bytes
+    }
+
+    #[test]
+    fn decode_setups_with_error() {
+        let mut bytes = BytesMut::with_capacity(0);
+        let mut cursor = Cursor::new(&mut bytes);
+
+        let packet = decode_setups(&mut cursor);
+        assert!(packet.is_err());
+    }
+
+    #[test]
+    fn decode_setups_with_success() {
+        let mut bytes = BytesMut::with_capacity(PACKET_SIZE);
+        bytes = put_packet_header(bytes);
+
+        bytes.put_u8(1);
+        bytes.put_u8(2);
+        bytes.put_u8(3);
+        bytes.put_u8(4);
+        bytes.put_f32_le(5.0);
+        bytes.put_f32_le(6.0);
+        bytes.put_f32_le(7.0);
+        bytes.put_f32_le(8.0);
+        bytes.put_u8(9);
+        bytes.put_u8(10);
+        bytes.put_u8(11);
+        bytes.put_u8(12);
+        bytes.put_u8(13);
+        bytes.put_u8(14);
+        bytes.put_u8(15);
+        bytes.put_u8(16);
+        bytes.put_f32_le(17.0);
+        bytes.put_f32_le(18.0);
+        bytes.put_u8(19);
+        bytes.put_f32_le(20.0);
+
+        let padding = vec![0u8; 779];
+        bytes.put(padding.as_slice());
+
+        let mut cursor = Cursor::new(&mut bytes);
+
+        let packet = decode_setups(&mut cursor).unwrap();
+        let setup = packet.setups()[0];
+
+        assert_eq!(1, setup.front_wing());
+        assert_eq!(2, setup.rear_wing());
+        assert_eq!(3, setup.on_throttle());
+        assert_eq!(4, setup.off_throttle());
+        assert_approx_eq!(5.0, setup.front_camber());
+        assert_approx_eq!(6.0, setup.rear_camber());
+        assert_approx_eq!(7.0, setup.front_toe());
+        assert_approx_eq!(8.0, setup.rear_toe());
+        assert_eq!(9, setup.front_suspension());
+        assert_eq!(10, setup.rear_suspension());
+        assert_eq!(11, setup.front_anti_roll_bar());
+        assert_eq!(12, setup.rear_anti_roll_bar());
+        assert_eq!(13, setup.front_suspension_height());
+        assert_eq!(14, setup.rear_suspension_height());
+        assert_eq!(15, setup.brake_pressure());
+        assert_eq!(16, setup.brake_bias());
+        assert_approx_eq!(17.0, setup.front_tyre_pressure());
+        assert_approx_eq!(18.0, setup.rear_tyre_pressure());
+        assert_eq!(19, setup.ballast());
+        assert_approx_eq!(20.0, setup.fuel_load());
     }
 }

@@ -6,6 +6,7 @@ use crate::packet::lap::LapPacket;
 use crate::packet::motion::MotionPacket;
 use crate::packet::participants::ParticipantsPacket;
 use crate::packet::session::SessionPacket;
+use crate::packet::setup::CarSetupPacket;
 use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
 
@@ -41,6 +42,10 @@ pub enum Packet {
 
     /// The F1 games provide information about the current session on a regular basis.
     Session(SessionPacket),
+
+    /// Car setup packets publish the setup of each car in the session. In multiplayer sessions, the
+    /// setups of other player's cars are redacted to enable a fair competition.
+    Setup(CarSetupPacket),
 
     /// Packet from F1 2019
     Nineteen(nineteen::Packet),

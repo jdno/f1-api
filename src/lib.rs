@@ -34,7 +34,7 @@ impl F1 {
     ///
     /// ```
     /// use f1_api::F1;
-    /// use f1_api::packet::Packet::{Event, Lap, Motion, Nineteen, Participants, Session};
+    /// use f1_api::packet::Packet::{Event, Lap, Motion, Nineteen, Participants, Session, Setup};
     /// use std::net::{IpAddr, SocketAddr};
     /// use tokio::stream::StreamExt;
     ///
@@ -52,6 +52,7 @@ impl F1 {
     ///             Motion(_) => println!("Received Motion packet"),
     ///             Participants(_) => println!("Received Participants packet"),
     ///             Session(_) => println!("Received Session packet"),
+    ///             Setup(_) => println!("Received Setup packet"),
     ///             Nineteen(packet) => println!("Received a packet from F1 2019")
     ///         }
     ///     }
