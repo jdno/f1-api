@@ -19,6 +19,7 @@ pub mod participants;
 pub mod session;
 pub mod setup;
 pub mod status;
+pub mod telemetry;
 
 /// A packet published by an F1 game.
 ///
