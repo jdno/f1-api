@@ -1,240 +1,235 @@
-//! Packet with the telemetry data of each car in the session
+//! Decoder for telemetry packets sent by F1 2019
+//!
+//! The telemetry packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of
+//! the packet format is identical.
 
-use crate::from_bytes::FromBytes;
-use crate::nineteen::PacketHeader;
-use bitflags::bitflags;
+use crate::nineteen::header::decode_header;
+use crate::packet::ensure_packet_size;
+use crate::packet::telemetry::{Button, Gear, Surface, Telemetry, TelemetryPacket};
+use crate::types::CornerProperty;
 use bytes::{Buf, BytesMut};
-use std::convert::TryFrom;
 use std::io::{Cursor, Error, ErrorKind};
 
-bitflags! {
-    /// A bit field with currently pressed buttons.
-    ///
-    /// F1 2019 publishes which buttons are currently being pressed by the user. This information is
-    /// encoded in a bit field, where each bit represents a different button.
-    pub struct Button: u32 {
-        const CROSS_OR_A = 0x001;
-        const TRIANGLE_OR_Y = 0x0002;
-        const CIRCLE_OR_B = 0x0004;
-        const SQUARE_OR_X = 0x0008;
-        const DPAD_LEFT = 0x0010;
-        const DPAD_RIGHT = 0x0020;
-        const DPAD_UP = 0x0040;
-        const DPAD_DOWN = 0x0080;
-        const OPTIONS_OR_MENU = 0x0100;
-        const L1_OR_LB = 0x0200;
-        const R1_OR_RB = 0x0400;
-        const L2_OR_LT = 0x0800;
-        const R2_OR_RT = 0x1000;
-        const LEFT_STICK_CLICK = 0x2000;
-        const RIGHT_STICK_CLICK =0x4000;
-    }
-}
+/// Size of the telemetry packet in bytes
+pub const PACKET_SIZE: usize = 1347;
 
-/// The gear the car is in.
-pub enum Gear {
-    Reverse = -1,
-    Neutral = 0,
-    First = 1,
-    Second = 2,
-    Third = 3,
-    Fourth = 4,
-    Fifth = 5,
-    Sixth = 6,
-    Seventh = 7,
-    Eighth = 8,
-}
-
-/// The surface areas a tyre can be in contact with.
-pub enum Surface {
-    Tarmac = 0,
-    RumbleStrip = 1,
-    Concrete = 2,
-    Rock = 3,
-    Gravel = 4,
-    Mud = 5,
-    Sand = 6,
-    Grass = 7,
-    Water = 8,
-    Cobblestone = 9,
-    Metal = 10,
-    Ridged = 11,
-}
-
-/// The telemetry of a race car.
+/// Decode a telemetry packet sent by F1 2019
 ///
-/// Telemetry provides detailed, and quickly changing data on the inner mechanics of each car, e.g.
-/// its speed, engine RPMs, and temperatures.
-pub struct Telemetry {
-    /// The speed of the car in kilometers per hour.
-    pub speed: u16,
+/// F1 2018 and F1 2019 publish the same data in their telemetry packets, but with different packet
+/// headers.
+pub fn decode_telemetry(cursor: &mut Cursor<&mut BytesMut>) -> Result<TelemetryPacket, Error> {
+    ensure_packet_size(PACKET_SIZE, cursor)?;
 
-    /// Ratio of applied throttle (0.0 to 1.0).
-    pub throttle: f32,
+    let header = decode_header(cursor)?;
+    let mut telemetry = Vec::with_capacity(20);
 
-    /// Ratio of steering input (-1.0 full lock left to 1.0 full lock right).
-    pub steering: f32,
+    for _ in 0..20 {
+        telemetry.push(Telemetry::new(
+            cursor.get_u16_le(),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+            cursor.get_f32_le(),
+            cursor.get_u8(),
+            decode_gear(cursor)?,
+            cursor.get_u16_le(),
+            cursor.get_u8() > 0,
+            cursor.get_u8(),
+            decode_brake_temperature(cursor),
+            decode_tyre_surface_temperature(cursor),
+            decode_tyre_inner_temperature(cursor),
+            cursor.get_u16_le(),
+            decode_tyre_pressure(cursor),
+            decode_surface_type(cursor)?,
+        ));
+    }
 
-    /// Ratio of brake applied (0.0 to 1.0).
-    pub brake: f32,
+    let button_status = match Button::from_bits(cursor.get_u32_le()) {
+        Some(button) => button,
+        None => Button::NONE,
+    };
 
-    /// Amount of clutch applied (0 to 100).
-    pub clutch: u8,
-
-    /// The current gear.
-    pub gear: Gear,
-
-    /// The engine's RPM.
-    pub engine_rpm: u16,
-
-    /// Whether the DRS is deployed.
-    pub drs: bool,
-
-    /// Rev lights indicator (percentage).
-    pub rev_lights: u8,
-
-    /// Brake temperature at the RL, RR, FL, FR in degrees celsius.
-    pub brake_temperature: (u16, u16, u16, u16),
-
-    /// Tyre surface temperature at the RL, RR, FL, FR in degrees celsius.
-    pub tyre_surface_temperature: (u16, u16, u16, u16),
-
-    /// Tyre inner temperature at the RL, RR, FL, FR in degrees celsius.
-    pub tyre_inner_temperature: (u16, u16, u16, u16),
-
-    /// Engine temperature in degrees celsius.
-    pub engine_temperature: u16,
-
-    /// Tyre pressure at the RL, RR, FL, FR in PSI.
-    pub tyre_pressure: (f32, f32, f32, f32),
-
-    /// The type of the surface the RL, RR, FL, and FR tyre have contact with.
-    pub surface_type: (Surface, Surface, Surface, Surface),
+    Ok(TelemetryPacket::new(header, telemetry, button_status))
 }
 
-/// A packet with telemetry data for each car in the session.
-pub struct TelemetryPacket {
-    /// Each packet starts with a packet header.
-    pub header: PacketHeader,
+fn decode_gear(cursor: &mut Cursor<&mut BytesMut>) -> Result<Gear, Error> {
+    let value = cursor.get_i8();
 
-    /// The telemetry data for each car in the session.
-    pub telemetry: Vec<Telemetry>,
-
-    /// Bit flag indicating which buttons are currently pressed.
-    pub button_status: Button,
-}
-
-impl TryFrom<i8> for Gear {
-    type Error = Error;
-
-    fn try_from(value: i8) -> Result<Self, Self::Error> {
-        match value {
-            -1 => Ok(Gear::Reverse),
-            0 => Ok(Gear::Neutral),
-            1 => Ok(Gear::First),
-            2 => Ok(Gear::Second),
-            3 => Ok(Gear::Third),
-            4 => Ok(Gear::Fourth),
-            5 => Ok(Gear::Fifth),
-            6 => Ok(Gear::Sixth),
-            7 => Ok(Gear::Seventh),
-            8 => Ok(Gear::Eighth),
-            _ => Err(Error::new(ErrorKind::InvalidData, "Failed to decode gear.")),
-        }
+    match value {
+        -1 => Ok(Gear::Reverse),
+        0 => Ok(Gear::Neutral),
+        1 => Ok(Gear::First),
+        2 => Ok(Gear::Second),
+        3 => Ok(Gear::Third),
+        4 => Ok(Gear::Fourth),
+        5 => Ok(Gear::Fifth),
+        6 => Ok(Gear::Sixth),
+        7 => Ok(Gear::Seventh),
+        8 => Ok(Gear::Eighth),
+        _ => Err(Error::new(ErrorKind::InvalidData, "Failed to decode gear.")),
     }
 }
 
-impl TryFrom<u8> for Surface {
-    type Error = Error;
+fn decode_brake_temperature(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<u16> {
+    CornerProperty::new(
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+    )
+}
 
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Surface::Tarmac),
-            1 => Ok(Surface::RumbleStrip),
-            2 => Ok(Surface::Concrete),
-            3 => Ok(Surface::Rock),
-            4 => Ok(Surface::Gravel),
-            5 => Ok(Surface::Mud),
-            6 => Ok(Surface::Sand),
-            7 => Ok(Surface::Grass),
-            8 => Ok(Surface::Water),
-            9 => Ok(Surface::Cobblestone),
-            10 => Ok(Surface::Metal),
-            11 => Ok(Surface::Ridged),
-            _ => Err(Error::new(
-                ErrorKind::InvalidData,
-                "Failed to decode surface.",
-            )),
-        }
+fn decode_tyre_surface_temperature(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<u16> {
+    CornerProperty::new(
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+    )
+}
+
+fn decode_tyre_inner_temperature(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<u16> {
+    CornerProperty::new(
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+        cursor.get_u16_le(),
+    )
+}
+
+fn decode_tyre_pressure(cursor: &mut Cursor<&mut BytesMut>) -> CornerProperty<f32> {
+    CornerProperty::new(
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+        cursor.get_f32_le(),
+    )
+}
+
+fn decode_surface_type(
+    cursor: &mut Cursor<&mut BytesMut>,
+) -> Result<CornerProperty<Surface>, Error> {
+    Ok(CornerProperty::new(
+        decode_surface(cursor)?,
+        decode_surface(cursor)?,
+        decode_surface(cursor)?,
+        decode_surface(cursor)?,
+    ))
+}
+
+fn decode_surface(cursor: &mut Cursor<&mut BytesMut>) -> Result<Surface, Error> {
+    let value = cursor.get_u8();
+
+    match value {
+        0 => Ok(Surface::Tarmac),
+        1 => Ok(Surface::RumbleStrip),
+        2 => Ok(Surface::Concrete),
+        3 => Ok(Surface::Rock),
+        4 => Ok(Surface::Gravel),
+        5 => Ok(Surface::Mud),
+        6 => Ok(Surface::Sand),
+        7 => Ok(Surface::Grass),
+        8 => Ok(Surface::Water),
+        9 => Ok(Surface::Cobblestone),
+        10 => Ok(Surface::Metal),
+        11 => Ok(Surface::Ridged),
+        _ => Err(Error::new(
+            ErrorKind::InvalidData,
+            "Failed to decode surface.",
+        )),
     }
 }
 
-impl FromBytes for TelemetryPacket {
-    fn buffer_size() -> usize {
-        1347
+#[cfg(test)]
+mod tests {
+    use crate::nineteen::telemetry::{decode_telemetry, PACKET_SIZE};
+    use crate::packet::telemetry::{Button, Gear, Surface};
+    use assert_approx_eq::assert_approx_eq;
+    use bytes::{BufMut, BytesMut};
+    use std::io::Cursor;
+
+    fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
+        bytes.put_u16_le(2019);
+        bytes.put_u8(1);
+        bytes.put_u8(2);
+        bytes.put_u8(3);
+        bytes.put_u8(0);
+        bytes.put_u64_le(u64::max_value());
+        bytes.put_f32_le(1.0);
+        bytes.put_u32_le(u32::max_value());
+        bytes.put_u8(0);
+
+        bytes
     }
 
-    fn decode(cursor: &mut Cursor<&mut BytesMut>) -> Result<Self, Error>
-    where
-        Self: Sized,
-    {
-        let header = PacketHeader::decode(cursor)?;
-        let mut telemetry = Vec::with_capacity(20);
+    #[test]
+    fn decode_telemetry_with_error() {
+        let mut bytes = BytesMut::with_capacity(0);
+        let mut cursor = Cursor::new(&mut bytes);
+
+        let packet = decode_telemetry(&mut cursor);
+        assert!(packet.is_err());
+    }
+
+    #[test]
+    fn decode_telemetry_with_success() {
+        let mut bytes = BytesMut::with_capacity(PACKET_SIZE);
+        bytes = put_packet_header(bytes);
 
         for _ in 0..20 {
-            telemetry.push(Telemetry {
-                speed: cursor.get_u16_le(),
-                throttle: cursor.get_f32_le(),
-                steering: cursor.get_f32_le(),
-                brake: cursor.get_f32_le(),
-                clutch: cursor.get_u8(),
-                gear: Gear::try_from(cursor.get_i8())?,
-                engine_rpm: cursor.get_u16_le(),
-                drs: cursor.get_u8() > 0,
-                rev_lights: cursor.get_u8(),
-                brake_temperature: (
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                ),
-                tyre_surface_temperature: (
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                ),
-                tyre_inner_temperature: (
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                    cursor.get_u16_le(),
-                ),
-                engine_temperature: cursor.get_u16_le(),
-                tyre_pressure: (
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                    cursor.get_f32_le(),
-                ),
-                surface_type: (
-                    Surface::try_from(cursor.get_u8())?,
-                    Surface::try_from(cursor.get_u8())?,
-                    Surface::try_from(cursor.get_u8())?,
-                    Surface::try_from(cursor.get_u8())?,
-                ),
-            });
+            bytes.put_u16_le(1);
+            bytes.put_f32_le(2.0);
+            bytes.put_f32_le(3.0);
+            bytes.put_f32_le(4.0);
+            bytes.put_u8(5);
+            bytes.put_u8(6);
+            bytes.put_u16_le(7);
+            bytes.put_u8(1);
+            bytes.put_u8(9);
+            bytes.put_u16_le(10);
+            bytes.put_u16_le(11);
+            bytes.put_u16_le(12);
+            bytes.put_u16_le(13);
+            bytes.put_u16_le(14);
+            bytes.put_u16_le(15);
+            bytes.put_u16_le(16);
+            bytes.put_u16_le(17);
+            bytes.put_u16_le(18);
+            bytes.put_u16_le(19);
+            bytes.put_u16_le(20);
+            bytes.put_u16_le(21);
+            bytes.put_u16_le(22);
+            bytes.put_f32_le(23.0);
+            bytes.put_f32_le(24.0);
+            bytes.put_f32_le(25.0);
+            bytes.put_f32_le(26.0);
+            bytes.put_u8(5);
+            bytes.put_u8(6);
+            bytes.put_u8(7);
+            bytes.put_u8(8);
         }
 
-        let button_status = match Button::from_bits(cursor.get_u32_le()) {
-            Some(button) => button,
-            None => Button { bits: 0 },
-        };
+        bytes.put_u32_le(0x0001);
 
-        Ok(TelemetryPacket {
-            header,
-            telemetry,
-            button_status,
-        })
+        let mut cursor = Cursor::new(&mut bytes);
+
+        let packet = decode_telemetry(&mut cursor).unwrap();
+        let telemetry = packet.telemetry()[0];
+
+        assert_eq!(1, telemetry.speed());
+        assert_approx_eq!(2.0, telemetry.throttle());
+        assert_approx_eq!(3.0, telemetry.steering());
+        assert_approx_eq!(4.0, telemetry.brake());
+        assert_eq!(5, telemetry.clutch());
+        assert_eq!(Gear::Sixth, telemetry.gear());
+        assert_eq!(7, telemetry.engine_rpm());
+        assert!(telemetry.drs());
+        assert_eq!(9, telemetry.rev_lights());
+        assert_eq!(10, telemetry.brake_temperature().front_left());
+        assert_eq!(14, telemetry.tyre_surface_temperature().front_left());
+        assert_eq!(18, telemetry.tyre_inner_temperature().front_left());
+        assert_eq!(22, telemetry.engine_temperature());
+        assert_approx_eq!(23.0, telemetry.tyre_pressure().front_left());
+        assert_eq!(Surface::Mud, telemetry.surface_type().front_left());
+        assert_eq!(Button::CROSS_OR_A, packet.button_status());
     }
 }
