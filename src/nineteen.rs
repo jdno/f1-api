@@ -7,6 +7,20 @@
 //! The full API specification can be found here:
 //! https://forums.codemasters.com/topic/44592-f1-2019-udp-specification/
 
+use crate::nineteen::event::decode_event;
+use crate::nineteen::header::decode_header;
+use crate::nineteen::lap::decode_lap_data;
+use crate::nineteen::motion::decode_motion;
+use crate::nineteen::participants::decode_participants;
+use crate::nineteen::session::decode_session;
+use crate::nineteen::setup::decode_setups;
+use crate::nineteen::status::decode_statuses;
+use crate::nineteen::telemetry::decode_telemetry;
+use crate::packet::header::PacketType;
+use crate::packet::Packet;
+use bytes::BytesMut;
+use std::io::{Cursor, Error};
+
 mod header;
 
 pub mod event;
@@ -39,3 +53,26 @@ pub enum Flag {
 /// Data for all vehicles is provided as an array. References to the data in
 /// this array are made in the form of a vehicle index.
 pub type VehicleIndex = u8;
+
+/// Decode a packet sent by F1 2019
+///
+/// F1 2019 defines its own API specification that is implemented in the `nineteen` module. For each
+/// packet type defined in the API specification, a decoder function exists that maps the packet
+/// from F1 2019 to the unified packet format of this crate.
+pub fn decode_nineteen(cursor: &mut Cursor<&mut BytesMut>) -> Result<Packet, Error> {
+    let header = decode_header(cursor)?;
+    cursor.set_position(0);
+
+    let packet = match header.packet_type() {
+        PacketType::Event => Packet::Event(decode_event(cursor)?),
+        PacketType::Lap => Packet::Lap(decode_lap_data(cursor)?),
+        PacketType::Motion => Packet::Motion(decode_motion(cursor)?),
+        PacketType::Participants => Packet::Participants(decode_participants(cursor)?),
+        PacketType::Session => Packet::Session(decode_session(cursor)?),
+        PacketType::Setup => Packet::Setup(decode_setups(cursor)?),
+        PacketType::Status => Packet::Status(decode_statuses(cursor)?),
+        PacketType::Telemetry => Packet::Telemetry(decode_telemetry(cursor)?),
+    };
+
+    Ok(packet)
+}
