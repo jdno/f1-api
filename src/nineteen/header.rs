@@ -46,7 +46,6 @@ pub fn decode_header(cursor: &mut Cursor<&mut BytesMut>) -> Result<Header, Error
 #[derive(Debug, PartialEq)]
 pub enum PacketType {
     Telemetry = 6,
-    Status = 7,
 }
 
 /// The packet header at the beginning of each UDP packet.
@@ -103,7 +102,6 @@ impl TryFrom<u8> for PacketType {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             6 => Ok(PacketType::Telemetry),
-            7 => Ok(PacketType::Status),
             _ => Err(Error::new(
                 ErrorKind::InvalidData,
                 "Failed to decode packet id.",

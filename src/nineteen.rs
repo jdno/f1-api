@@ -9,7 +9,6 @@
 
 use crate::from_bytes::FromBytes;
 use crate::nineteen::header::PacketType;
-use crate::nineteen::status::CarStatusPacket;
 use crate::nineteen::telemetry::TelemetryPacket;
 use bytes::{Buf, BytesMut};
 use std::convert::TryFrom;
@@ -49,7 +48,6 @@ pub enum Flag {
 /// decoded to match an internal representation.
 pub enum Packet {
     Telemetry(TelemetryPacket),
-    Status(CarStatusPacket),
 }
 
 /// Data for all vehicles is provided as an array. References to the data in
@@ -101,7 +99,6 @@ impl FromBytes for Packet {
 
         let packet = match packet_type {
             PacketType::Telemetry => Packet::Telemetry(TelemetryPacket::from_bytes(cursor)?),
-            PacketType::Status => Packet::Status(CarStatusPacket::from_bytes(cursor)?),
         };
 
         Ok(packet)
