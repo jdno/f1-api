@@ -312,7 +312,7 @@ pub struct CarStatus {
 ///
 /// The F1 games publish data on the status of each car in the session at a rate that can be
 /// configured in the in-game settings.
-#[derive(new, Debug, Getters, PartialEq, Clone, PartialOrd, Default)]
+#[derive(new, Debug, Getters, PartialEq, Clone, PartialOrd)]
 pub struct CarStatusPacket {
     /// Returns the packet header prefixing the car status packet.
     #[getset(get = "pub")]

@@ -343,7 +343,7 @@ pub struct Participant {
 ///
 /// The F1 games provide information about each participant in a session, for example their name,
 /// team, and nationality. The data is updated every 5 seconds.
-#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, Eq, Ord, PartialOrd, Hash, Default)]
+#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, Eq, Ord, PartialOrd, Hash)]
 pub struct ParticipantsPacket {
     /// Returns the packet header prefixing the participants packet.
     #[getset(get = "pub")]

@@ -7,6 +7,32 @@ use std::fmt;
 use std::fmt::Display;
 use std::time::Duration;
 
+/// Supported API specifications
+///
+/// The modern F1 games have their own API specifications, each an evolution of the previous one.
+/// Since the data published by each game is unique in one way or another, support for additional
+/// API specs has to be implemented manually.
+#[derive(Debug, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash)]
+pub enum ApiSpec {
+    Nineteen,
+}
+
+/// Packets sent by F1 games
+///
+/// The modern F1 games have divided their telemetry output into multiple packets, which can be sent
+/// at different intervals based on how quickly their data changes.
+#[derive(Debug, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash)]
+pub enum PacketType {
+    Event,
+    Lap,
+    Motion,
+    Participants,
+    Session,
+    Setup,
+    Status,
+    Telemetry,
+}
+
 /// Version number of the game
 ///
 /// The modern F1 games include their version number in the packet header. The games are versioned
@@ -43,13 +69,22 @@ impl Display for GameVersion {
 /// the packet was created.
 ///
 /// TODO Verify that the session tie can be represented as a duration
-#[derive(
-    new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash, Default,
-)]
+#[derive(new, Debug, Getters, CopyGetters, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash)]
 pub struct Header {
+    /// Returns the API specification that was used to decode the packet.
+    #[getset(get_copy = "pub")]
+    api_spec: ApiSpec,
+
     /// Returns the version of the game.
     #[getset(get = "pub")]
     game_version: Option<GameVersion>,
+
+    /// Returns the type of the packet.
+    ///
+    /// The packet type is only required to determine how to decode the packet. After decoding it,
+    /// the packet type is represented by Rust's type system.
+    #[getset(get_copy = "pub")]
+    packet_type: PacketType,
 
     /// Returns the unique session UID.
     #[getset(get_copy = "pub")]
