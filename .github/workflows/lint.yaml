@@ -16,16 +16,6 @@ jobs:
       - name: Lint Markdown files
         run: markdownlint '**/*.md'
 
-  rustfmt:
-    name: Rustfmt
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Format Rust files
-        run: cargo fmt --all -- --check
-
   yaml:
     name: YAML
     runs-on: ubuntu-latest
