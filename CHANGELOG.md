@@ -10,10 +10,13 @@ and [Rust](https://github.com/rust-lang/rfcs/blob/master/text/1105-api-evolution
 
 ## [Unreleased]
 
+## [0.1.0] - 2020-03-22
+
 ### Added
 
 - F1 API now supports the full [API specification of F1 2019](https://forums.codemasters.com/topic/44592-f1-2019-udp-specification/).
 
 <!-- next-url -->
 
-[unreleased]: https://github.com/hellobits/f1-api/compare/0.0.0...HEAD
+[unreleased]: https://github.com/hellobits/f1-api/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/hellobits/f1-api/tags/v0.1.0
