@@ -11,6 +11,9 @@ license = "MIT OR Apache-2.0"
 [[example]]
 name = "cli"
 
+[[example]]
+name = "readme"
+
 [dependencies]
 bitflags = "1.2.1"
 bytes = "0.5.4"
