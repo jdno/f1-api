@@ -1,12 +1,23 @@
 [package]
 name = "f1-api"
 version = "0.0.0"
+authors = ["Jan David <jandavid@6a64.com>"]
 edition = "2018"
 
-authors = ["Jan David <jandavid@6a64.com>"]
-license = "MIT OR Apache-2.0"
+description = """
+F1 API is a client library for the telemetry API of the F1 video games by
+Codemasters. It uses asynchronous networking to decode the incoming UDP packets,
+and turns them into strongly typed Rust structs.
+"""
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+readme = "README.md"
+repository = "https://github.com/hellobits/f1-api"
+license = "MIT OR Apache-2.0"
+keywords = ["api", "codemasters", "f1", "gaming"]
+categories = ["api-bindings", "asynchronous"]
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 [[example]]
 name = "cli"
