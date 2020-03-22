@@ -1,0 +1,20 @@
+name: release
+
+on:
+  release:
+    types: [published, prereleased]
+
+jobs:
+  publish:
+    name: Publish crate to crates.io
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --token $CRATES_TOKEN -v --all-features
+        env:
+          crates_token: ${{ secrets.CRATES_TOKEN }}

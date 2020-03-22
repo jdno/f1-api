@@ -9,6 +9,7 @@ started.
 - [How to report a bug](#how-to-report-a-bug)
 - [How to request a feature](#how-to-request-a-feature)
 - [How to submit changes](#how-to-submit-changes)
+- [How to release a new version](#how-to-release-a-new-version)
 
 ## How to report a bug
 
@@ -50,6 +51,37 @@ request, and suggest or require changes. Since we are responsible for the code
 once it is merged, we take this very seriously. We want to be able to support it
 in the best way possible, and that requires us to fully understand it.
 
+## How to release a new version
+
+Cutting a release is largely automated to avoid errors and mistakes. These are
+the steps necessary to create a new release and publish it to [crates.io]:
+
+1. Create a new branch for the release.
+
+   ```shell script
+   git checkout master
+   git checkout -b cut-release
+   ```
+
+1. Run [cargo-release](https://github.com/sunng87/cargo-release) to prepare the
+   release. This sets the version, updates the changelog, and tags the commit.
+
+   ```shell script
+   cargo release [patch|minor|major]
+   ```
+
+1. Push the branch and tag to GitHub, create a pull request, and wait for the
+   checks to pass. If you are not an administrator, wait for a pull request
+   review.
+
+1. Go to the [releases](https://github.com/hellobits/f1-api/releases) and create
+   a release for the new version. Copy the relevant section from the [changelog]
+   into the release message, and name the release after the version. When saving
+   the release, a GitHub action is started that publishes the version to
+   [crates.io].
+
+[changelog]: ./CHANGELOG.md
+[crates.io]: https://crates.io
 [issues]: https://github.com/jdno/f1-api/issues
 [issues-closed]: https://github.com/jdno/f1-api/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed
 [pr]: https://github.com/jdno/f1-api/pulls
