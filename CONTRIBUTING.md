@@ -53,8 +53,9 @@ in the best way possible, and that requires us to fully understand it.
 
 ## How to release a new version
 
-Cutting a release is largely automated to avoid errors and mistakes. These are
-the steps necessary to create a new release and publish it to [crates.io]:
+Only members of Hello Bits can cut a new release. The process is largely
+automated to avoid errors and mistakes. These are the steps necessary to create
+a new release and publish it to [crates.io]:
 
 1. Create a new branch for the release.
 
@@ -70,9 +71,8 @@ the steps necessary to create a new release and publish it to [crates.io]:
    cargo release [patch|minor|major]
    ```
 
-1. Push the branch and tag to GitHub, create a pull request, and wait for the
-   checks to pass. If you are not an administrator, wait for a pull request
-   review.
+1. Push the branch to GitHub, create a pull request, and wait for the checks to
+   pass.
 
 1. Go to the [releases](https://github.com/hellobits/f1-api/releases) and create
    a release for the new version. Copy the relevant section from the [changelog]
