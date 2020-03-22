@@ -1,6 +1,8 @@
 # F1 API
 
 [![rust](https://github.com/hellobits/f1-api/workflows/rust/badge.svg)](https://github.com/hellobits/f1-api/actions)
+[![Crates.io](https://img.shields.io/crates/v/f1-api)][crate]
+[![Crates.io](https://img.shields.io/crates/l/f1-api)][crate]
 
 _A Rust implementation of the telemetry APIs of modern F1 video games._
 
@@ -83,6 +85,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
 
+[crate]: https://crates.io/crates/f1-api
 [codemasters]: https://www.codemasters.com/
 [f1]: https://www.codemasters.com/game/f1-2019/
 [tokio]: https://tokio.rs/
