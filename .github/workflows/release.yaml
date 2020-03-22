@@ -2,7 +2,7 @@ name: release
 
 on:
   release:
-    types: [published, prereleased]
+    types: [published]
 
 jobs:
   publish:
@@ -15,6 +15,6 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: publish
-          args: --token $CRATES_TOKEN -v --all-features
+          args: -v --all-features
         env:
-          crates_token: ${{ secrets.CRATES_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
