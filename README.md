@@ -8,7 +8,7 @@ This project implements a client library for the telemetry APIs that are
 provided by the current generation of [F1 video games][f1] by [Codemasters].
 The library is written in Rust, using [tokio] for async networking.
 
-_Built with ❤️ and 🦀 by [Hello Bits](https://github.com/hellobits)._
+_Built with_ ❤ _and_ 🦀 _by [Hello Bits](https://github.com/hellobits)._
 
 ## Getting Started
 
