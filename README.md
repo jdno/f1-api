@@ -1,8 +1,9 @@
 # F1 API
 
 [![rust](https://github.com/hellobits/f1-api/workflows/rust/badge.svg)](https://github.com/hellobits/f1-api/actions)
-[![Crates.io](https://img.shields.io/crates/v/f1-api)][crate]
-[![Crates.io](https://img.shields.io/crates/l/f1-api)][crate]
+[![Coverage](https://img.shields.io/codecov/c/gh/hellobits/f1-api)](https://codecov.io/gh/hellobits/f1-api)
+[![Version](https://img.shields.io/crates/v/f1-api)][crate]
+[![License](https://img.shields.io/crates/l/f1-api)][crate]
 
 _A Rust implementation of the telemetry APIs of modern F1 video games._
 
