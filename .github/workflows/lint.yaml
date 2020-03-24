@@ -1,4 +1,4 @@
-name: lint
+name: Lint
 
 on: [push]
 
@@ -10,11 +10,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install markdownlint
-        run: sudo npm install -g markdownlint-cli
+      - name: markdownlint-cli
+        uses: nosborn/github-action-markdown-cli@v1.1.1
+        with:
+          files: "**/*.md"
 
-      - name: Lint Markdown files
-        run: markdownlint '**/*.md'
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: prettier
+        uses: creyD/prettier_action@v2.1
+        with:
+          prettier_options: "--check"
+          branch: ${{ github.head_ref }}
 
   yaml:
     name: YAML
@@ -23,8 +35,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install yamllint
-        run: sudo apt-get install yamllint
-
-      - name: Lint YAML files
-        run: yamllint .
+      - name: Run yamllint
+        uses: actionshub/yamllint@v1.0.0
