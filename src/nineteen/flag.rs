@@ -1,8 +1,10 @@
 //! Decoder for flags that can be shown to cars
 
-use crate::types::Flag;
-use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
+
+use bytes::{Buf, BytesMut};
+
+use crate::types::Flag;
 
 /// Decode a flag that can be shown to cars
 pub fn decode_flag(cursor: &mut Cursor<&mut BytesMut>) -> Result<Flag, Error> {

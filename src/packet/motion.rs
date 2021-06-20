@@ -4,10 +4,11 @@
 //! motion packet. The rate with which these packets are sent can be configured in the game. F1 2018
 //! and F1 2019 publish the same motion data.
 
-use crate::packet::header::Header;
-use crate::types::{CornerProperty, Property3D};
 use derive_new::new;
 use getset::{CopyGetters, Getters};
+
+use crate::packet::header::Header;
+use crate::types::{CornerProperty, Property3D};
 
 /// Data about a car and its position and movement in space
 ///

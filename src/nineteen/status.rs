@@ -4,6 +4,10 @@
 //! visual tyre compound (e.g. hard). This makes it packet format and decoder incompatible with
 //! earlier F1 games.
 
+use std::io::{Cursor, Error, ErrorKind};
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::flag::decode_flag;
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
@@ -12,8 +16,6 @@ use crate::packet::status::{
     TractionControl, VisualTyreCompound,
 };
 use crate::types::CornerProperty;
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
 
 /// Size of the car status packet in bytes
 pub const PACKET_SIZE: usize = 1143;
@@ -195,15 +197,17 @@ fn decode_ers_deploy_mode(cursor: &mut Cursor<&mut BytesMut>) -> Result<ErsDeplo
 
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
+    use assert_approx_eq::assert_approx_eq;
+    use bytes::{BufMut, BytesMut};
+
     use crate::nineteen::status::{decode_statuses, PACKET_SIZE};
     use crate::packet::status::{
         DrsSetting, ErsDeployMode, FuelMix, PhysicalTyreCompound, TractionControl,
         VisualTyreCompound,
     };
     use crate::types::Flag;
-    use assert_approx_eq::assert_approx_eq;
-    use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

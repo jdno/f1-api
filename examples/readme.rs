@@ -1,7 +1,9 @@
+use std::net::{IpAddr, SocketAddr};
+
+use tokio_stream::StreamExt;
+
 use f1_api::packet::Packet::{Event, Lap, Motion, Participants, Session, Setup, Status, Telemetry};
 use f1_api::F1;
-use std::net::{IpAddr, SocketAddr};
-use tokio::stream::StreamExt;
 
 #[tokio::main]
 async fn main() {

@@ -27,12 +27,13 @@ name = "readme"
 
 [dependencies]
 bitflags = "1.2.1"
-bytes = "0.5.4"
+bytes = "1.0.1"
 derive-new = "0.5.8"
 getset = "0.1.0"
 net2 = "0.2.33"
-tokio = { version = "0.2.13", features = ["macros", "net", "stream", "udp"] }
-tokio-util = { version = "0.3.0", features = ["codec", "udp"] }
+tokio = { version = "1.7.1", features = ["macros", "net", "rt-multi-thread"] }
+tokio-stream = "0.1.6"
+tokio-util = { version = "0.6.7", features = ["codec", "net"] }
 
 [dev-dependencies]
 assert_approx_eq = "1.1.0"

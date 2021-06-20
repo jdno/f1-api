@@ -1,13 +1,15 @@
 //! A Rust implementation of the telemetry API provided by modern F1 video games
 
-use crate::codec::F1Codec;
-use crate::packet::Packet;
-use net2::UdpBuilder;
 use std::io::Error;
 use std::net::SocketAddr;
+
+use net2::UdpBuilder;
 use tokio::net::UdpSocket;
-use tokio::stream::{Stream, StreamExt};
+use tokio_stream::{Stream, StreamExt};
 use tokio_util::udp::UdpFramed;
+
+use crate::codec::F1Codec;
+use crate::packet::Packet;
 
 pub mod codec;
 pub mod nineteen;
@@ -32,10 +34,11 @@ impl F1 {
     /// # Examples
     ///
     /// ```
+    /// use std::net::{IpAddr, SocketAddr};
+    ///
     /// use f1_api::F1;
     /// use f1_api::packet::Packet::{Event, Lap, Motion, Participants, Session, Setup, Status, Telemetry};
-    /// use std::net::{IpAddr, SocketAddr};
-    /// use tokio::stream::StreamExt;
+    /// use tokio_stream::StreamExt;
     ///
     /// async fn example() {
     ///     let ip_address = IpAddr::from([0, 0, 0, 0]);

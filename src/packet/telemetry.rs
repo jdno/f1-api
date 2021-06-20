@@ -4,11 +4,12 @@
 //! includes physical properties of the car, e.g. its speed, but also information about the controls
 //! that are applied, e.g. which buttons are being pressed.
 
-use crate::packet::header::Header;
-use crate::types::CornerProperty;
 use bitflags::bitflags;
 use derive_new::new;
 use getset::{CopyGetters, Getters};
+
+use crate::packet::header::Header;
+use crate::types::CornerProperty;
 
 bitflags! {
     /// A bit field with currently pressed buttons.

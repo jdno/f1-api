@@ -1,10 +1,12 @@
 //! Decoder for header prefixing packets sent by F1 2019
 
-use crate::packet::ensure_packet_size;
-use crate::packet::header::{ApiSpec, GameVersion, Header, PacketType};
+use std::io::{Cursor, Error, ErrorKind};
+
 use bitflags::_core::time::Duration;
 use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
+
+use crate::packet::ensure_packet_size;
+use crate::packet::header::{ApiSpec, GameVersion, Header, PacketType};
 
 /// Size of the packet header in F1 2019
 pub const HEADER_SIZE: usize = 23;
@@ -77,10 +79,12 @@ fn decode_packet_type(cursor: &mut Cursor<&mut BytesMut>) -> Result<PacketType, 
 
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
+    use bytes::{BufMut, BytesMut};
+
     use crate::nineteen::header::{decode_header, HEADER_SIZE};
     use crate::packet::header::{ApiSpec, PacketType};
-    use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
 
     #[test]
     fn decode_header_with_error() {

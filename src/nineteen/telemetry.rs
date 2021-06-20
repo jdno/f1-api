@@ -3,12 +3,14 @@
 //! The telemetry packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of
 //! the packet format is identical.
 
+use std::io::{Cursor, Error, ErrorKind};
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
 use crate::packet::telemetry::{Button, Gear, Surface, Telemetry, TelemetryPacket};
 use crate::types::CornerProperty;
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
 
 /// Size of the telemetry packet in bytes
 pub const PACKET_SIZE: usize = 1347;
@@ -141,11 +143,13 @@ fn decode_surface(cursor: &mut Cursor<&mut BytesMut>) -> Result<Surface, Error> 
 
 #[cfg(test)]
 mod tests {
-    use crate::nineteen::telemetry::{decode_telemetry, PACKET_SIZE};
-    use crate::packet::telemetry::{Button, Gear, Surface};
+    use std::io::Cursor;
+
     use assert_approx_eq::assert_approx_eq;
     use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
+
+    use crate::nineteen::telemetry::{decode_telemetry, PACKET_SIZE};
+    use crate::packet::telemetry::{Button, Gear, Surface};
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

@@ -20,12 +20,13 @@ the packets that the F1 games sent. The only piece users need to interact with
 is the `F1` struct and its high-level interface.
 
 ```rust
+use std::net::{IpAddr, SocketAddr};
+
 use f1_api::F1;
 use f1_api::packet::Packet::{
     Event, Lap, Motion, Participants, Session, Setup, Status, Telemetry
 };
-use std::net::{IpAddr, SocketAddr};
-use tokio::stream::StreamExt;
+use tokio_stream::StreamExt;
 
 #[tokio::main]
 async fn main() {

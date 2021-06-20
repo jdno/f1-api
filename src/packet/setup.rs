@@ -3,9 +3,10 @@
 //! The F1 games publish data about the setups of all cars in a session. In multiplayer sessions,
 //! setups of other players are redacted to prevent anyone from gaining an unfair advantage.
 
-use crate::packet::header::Header;
 use derive_new::new;
 use getset::{CopyGetters, Getters};
+
+use crate::packet::header::Header;
 
 /// Setup of a car
 ///

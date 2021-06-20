@@ -3,12 +3,14 @@
 //! The lap data packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of the
 //! packet format is identical.
 
+use std::io::{Cursor, Error, ErrorKind};
+use std::time::Duration;
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
 use crate::packet::lap::{DriverStatus, Lap, LapPacket, PitStatus, ResultStatus, Sector};
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
-use std::time::Duration;
 
 /// Size of the lap data packet in bytes
 pub const PACKET_SIZE: usize = 843;
@@ -112,10 +114,12 @@ fn decode_result_status(cursor: &mut Cursor<&mut BytesMut>) -> Result<ResultStat
 
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
+    use bytes::{BufMut, BytesMut};
+
     use crate::nineteen::lap::{decode_lap_data, PACKET_SIZE};
     use crate::packet::lap::{DriverStatus, PitStatus, ResultStatus, Sector};
-    use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

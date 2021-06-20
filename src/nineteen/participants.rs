@@ -3,13 +3,15 @@
 //! F1 2019 extends the participants packet from F1 2018 with the `telemetry_privacy` field. Other
 //! than that both games use the same packet format.
 
+use std::io::{Cursor, Error, ErrorKind};
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
 use crate::packet::participants::{
     Controller, Driver, Nationality, Participant, ParticipantsPacket, Team, TelemetryPrivacy,
 };
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
 
 /// Size of the participants packet.
 pub const PACKET_SIZE: usize = 1104;
@@ -341,10 +343,12 @@ fn decode_telemetry_privacy(
 
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
+    use bytes::{BufMut, BytesMut};
+
     use crate::nineteen::participants::{decode_name, decode_participants, PACKET_SIZE};
     use crate::packet::participants::{Controller, Driver, Nationality, Team, TelemetryPrivacy};
-    use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

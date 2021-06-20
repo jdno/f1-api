@@ -1,10 +1,12 @@
 //! Codec for modern F1 games
 
+use std::io::{Cursor, Error, ErrorKind};
+
+use bytes::{Buf, BytesMut};
+use tokio_util::codec::Decoder;
+
 use crate::nineteen::decode_nineteen;
 use crate::packet::Packet;
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
-use tokio_util::codec::Decoder;
 
 /// Codec to decode UDP packets published by modern F1 games.
 ///

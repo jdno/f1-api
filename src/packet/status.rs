@@ -3,10 +3,11 @@
 //! The F1 games provide detailed information about the status of each car in the session. The rate
 //! with which the data is provided can be configured in the in-game settings.
 
-use crate::packet::header::Header;
-use crate::types::{CornerProperty, Flag};
 use derive_new::new;
 use getset::{CopyGetters, Getters};
+
+use crate::packet::header::Header;
+use crate::types::{CornerProperty, Flag};
 
 /// Traction control settings
 ///
