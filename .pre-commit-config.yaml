@@ -1,28 +1,41 @@
+# pre-commit configuration
+#
+# We use pre-commit hooks to run checks on changed code before it is committed
+# and pushed. The checks look for common errors and mistakes, and they enforce a
+# consistent coding style.
+#
+# Checks in pre-commit hooks are relatively cheap. Expensive checks such as
+# running a full test suite are typically only performed during continuous
+# integration.
+#
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+---
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: master
+    rev: v4.0.1
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/adrienverge/yamllint
-    rev: master
+    rev: v1.26.1
     hooks:
       - id: yamllint
-  - repo: https://github.com/jdno/pre-commit-rust
-    rev: v1.1.0
-    hooks:
-      - id: clippy
-        args: [--all-targets, --all-features, --, -D, warnings]
-      - id: fmt
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: master
+    rev: v0.27.1
     hooks:
       - id: markdownlint
-  - repo: https://github.com/prettier/prettier
-    rev: master
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.3.1
     hooks:
       - id: prettier
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: cargo-check
+      - id: clippy
+        args: [--all-features, --all-targets, --, -D, warnings]
+      - id: fmt
+        args: [--all, --]
