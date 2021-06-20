@@ -18,5 +18,5 @@ and [Rust](https://github.com/rust-lang/rfcs/blob/master/text/1105-api-evolution
 
 <!-- next-url -->
 
-[unreleased]: https://github.com/hellobits/f1-api/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/hellobits/f1-api/tags/v0.1.0
+[unreleased]: https://github.com/nordsdk/f1-api/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/nordsdk/f1-api/tags/v0.1.0

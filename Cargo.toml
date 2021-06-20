@@ -11,7 +11,7 @@ and turns them into strongly typed Rust structs.
 """
 
 readme = "README.md"
-repository = "https://github.com/hellobits/f1-api"
+repository = "https://github.com/nordsdk/f1-api"
 license = "MIT OR Apache-2.0"
 keywords = ["api", "codemasters", "f1", "gaming"]
 categories = ["api-bindings", "asynchronous"]
@@ -49,5 +49,5 @@ pre-release-replacements = [
   {file="CHANGELOG.md", search="\\.\\.\\.HEAD", replace="...{{tag_name}}", exactly=1},
   {file="CHANGELOG.md", search="<!-- next-header -->", replace="<!-- next-header -->\n\n## [Unreleased]", exactly=1},
   {file="CHANGELOG.md", search="\\[unreleased\\]", replace="[{{version}}]"},
-  {file="CHANGELOG.md", search="<!-- next-url -->\n", replace="<!-- next-url -->\n\n[unreleased]: https://github.com/hellobits/f1-api/compare/{{tag_name}}...HEAD", exactly=1},
+  {file="CHANGELOG.md", search="<!-- next-url -->\n", replace="<!-- next-url -->\n\n[unreleased]: https://github.com/nordsdk/f1-api/compare/{{tag_name}}...HEAD", exactly=1},
 ]

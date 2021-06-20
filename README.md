@@ -1,7 +1,7 @@
 # F1 API
 
-[![rust](https://github.com/hellobits/f1-api/workflows/rust/badge.svg)](https://github.com/hellobits/f1-api/actions)
-[![Coverage](https://img.shields.io/codecov/c/gh/hellobits/f1-api)](https://codecov.io/gh/hellobits/f1-api)
+[![rust](https://github.com/nordsdk/f1-api/workflows/rust/badge.svg)](https://github.com/nordsdk/f1-api/actions)
+[![Coverage](https://img.shields.io/codecov/c/gh/nordsdk/f1-api)](https://codecov.io/gh/nordsdk/f1-api)
 [![Version](https://img.shields.io/crates/v/f1-api)][crate]
 [![License](https://img.shields.io/crates/l/f1-api)][crate]
 
@@ -11,7 +11,7 @@ This project implements a client library for the telemetry APIs that are
 provided by the current generation of [F1 video games][f1] by [Codemasters].
 The library is written in Rust, using [tokio] for async networking.
 
-_Built with_ ❤ _and_ 🦀 _by [Hello Bits](https://github.com/hellobits)._
+_Built with_ ❤ _and_ 🦀 _as part of the [Nord SDK](https://github.com/nordsdk)._
 
 ## Getting Started
 
