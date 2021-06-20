@@ -3,7 +3,7 @@
 use std::io::Error;
 use std::net::SocketAddr;
 
-use net2::UdpBuilder;
+use socket2::{Domain, Protocol, Socket, Type};
 use tokio::net::UdpSocket;
 use tokio_stream::{Stream, StreamExt};
 use tokio_util::udp::UdpFramed;
@@ -63,11 +63,13 @@ impl F1 {
     /// ```
     pub fn stream(socket_address: SocketAddr) -> Result<impl Stream<Item = Packet>, Error> {
         let socket = match socket_address {
-            SocketAddr::V4(address) => UdpBuilder::new_v4()?.bind(address),
-            SocketAddr::V6(address) => UdpBuilder::new_v6()?.only_v6(true)?.bind(address),
+            SocketAddr::V4(_) => Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP)),
+            SocketAddr::V6(_) => Socket::new(Domain::IPV6, Type::DGRAM, Some(Protocol::UDP)),
         }?;
 
-        Ok(UdpFramed::new(UdpSocket::from_std(socket)?, F1Codec)
+        socket.bind(&socket_address.into())?;
+
+        Ok(UdpFramed::new(UdpSocket::from_std(socket.into())?, F1Codec)
             .map(|result| result.unwrap())
             .map(|(packet, _address)| packet))
     }
