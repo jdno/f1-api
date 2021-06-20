@@ -4,13 +4,15 @@
 //! only two events, but _F1 2019_ extended this to nine different events. Some events carry a
 //! payload that further defines the event, and that are declared in this module as structs.
 
-use crate::packet::header::Header;
-use crate::types::VehicleIndex;
-use derive_new::new;
-use getset::{CopyGetters, Getters};
 use std::fmt;
 use std::fmt::Display;
 use std::time::Duration;
+
+use derive_new::new;
+use getset::{CopyGetters, Getters};
+
+use crate::packet::header::Header;
+use crate::types::VehicleIndex;
 
 /// Payload for fastest lap event
 ///

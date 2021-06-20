@@ -4,10 +4,12 @@
 //! which the packets are sent can be configured in the game. F1 2018 and F1 2019 share the same
 //! packet format.
 
-use crate::packet::header::Header;
+use std::time::Duration;
+
 use derive_new::new;
 use getset::{CopyGetters, Getters};
-use std::time::Duration;
+
+use crate::packet::header::Header;
 
 /// Statuses a driver can have during a lap
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Ord, PartialOrd, Hash)]

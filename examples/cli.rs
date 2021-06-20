@@ -1,9 +1,11 @@
-use clap::{crate_version, App, Arg};
-use f1_api::packet::Packet::{Event, Lap, Motion, Participants, Session, Setup, Status, Telemetry};
-use f1_api::F1;
 use std::net::{IpAddr, SocketAddr};
 use std::str::FromStr;
-use tokio::stream::StreamExt;
+
+use clap::{crate_version, App, Arg};
+use tokio_stream::StreamExt;
+
+use f1_api::packet::Packet::{Event, Lap, Motion, Participants, Session, Setup, Status, Telemetry};
+use f1_api::F1;
 
 #[tokio::main]
 async fn main() {

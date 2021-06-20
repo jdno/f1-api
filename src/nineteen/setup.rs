@@ -3,11 +3,13 @@
 //! The car setup packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of
 //! the packet format is identical.
 
+use std::io::{Cursor, Error};
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
 use crate::packet::setup::{CarSetup, CarSetupPacket};
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error};
 
 /// Size of the car setups packet in bytes
 pub const PACKET_SIZE: usize = 843;
@@ -52,10 +54,12 @@ pub fn decode_setups(cursor: &mut Cursor<&mut BytesMut>) -> Result<CarSetupPacke
 
 #[cfg(test)]
 mod tests {
-    use crate::nineteen::setup::{decode_setups, PACKET_SIZE};
+    use std::io::Cursor;
+
     use assert_approx_eq::assert_approx_eq;
     use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
+
+    use crate::nineteen::setup::{decode_setups, PACKET_SIZE};
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

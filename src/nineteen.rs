@@ -7,6 +7,10 @@
 //! The full API specification can be found here:
 //! https://forums.codemasters.com/topic/44592-f1-2019-udp-specification/
 
+use std::io::{Cursor, Error};
+
+use bytes::BytesMut;
+
 use crate::nineteen::event::decode_event;
 use crate::nineteen::header::decode_header;
 use crate::nineteen::lap::decode_lap_data;
@@ -18,8 +22,6 @@ use crate::nineteen::status::decode_statuses;
 use crate::nineteen::telemetry::decode_telemetry;
 use crate::packet::header::PacketType;
 use crate::packet::Packet;
-use bytes::BytesMut;
-use std::io::{Cursor, Error};
 
 mod header;
 

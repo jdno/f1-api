@@ -3,15 +3,17 @@
 //! The session packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of the
 //! packet format is identical.
 
+use std::io::{Cursor, Error, ErrorKind};
+use std::time::Duration;
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::flag::decode_flag;
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
 use crate::packet::session::{
     Formula, MarshalZone, SafetyCar, Session, SessionPacket, Track, Weather,
 };
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
-use std::time::Duration;
 
 /// Size of the session packet in F1 2019
 pub const PACKET_SIZE: usize = 149;
@@ -183,10 +185,12 @@ fn decode_safety_car(cursor: &mut Cursor<&mut BytesMut>) -> Result<SafetyCar, Er
 
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
+    use bytes::{BufMut, BytesMut};
+
     use crate::nineteen::session::{decode_session, PACKET_SIZE};
     use crate::packet::session::{Formula, SafetyCar, Session, Track, Weather};
-    use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

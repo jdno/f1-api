@@ -3,12 +3,14 @@
 //! The motion packets by F1 2018 and F1 2019 differ only in their packet headers, the rest of the
 //! packet format is identical.
 
+use std::io::{Cursor, Error};
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
 use crate::packet::motion::{Motion, MotionPacket};
 use crate::types::{CornerProperty, Property3D};
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error};
 
 /// Size of the motion packet in bytes
 pub const PACKET_SIZE: usize = 1343;
@@ -174,10 +176,12 @@ fn decode_angular_acceleration(cursor: &mut Cursor<&mut BytesMut>) -> Property3D
 
 #[cfg(test)]
 mod tests {
-    use crate::nineteen::motion::{decode_motion, PACKET_SIZE};
+    use std::io::Cursor;
+
     use assert_approx_eq::assert_approx_eq;
     use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
+
+    use crate::nineteen::motion::{decode_motion, PACKET_SIZE};
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

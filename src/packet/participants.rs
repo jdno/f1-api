@@ -304,7 +304,9 @@ impl Default for TelemetryPrivacy {
 ///
 /// The F1 games publish data for each participant in a session that identifies them. This data
 /// includes the participant's name, team, and nationality among others.
-#[derive(new, Debug, CopyGetters, Getters, PartialEq, Clone, Eq, Ord, PartialOrd, Hash, Default)]
+#[derive(
+    new, Debug, CopyGetters, Getters, PartialEq, Clone, Eq, Ord, PartialOrd, Hash, Default,
+)]
 pub struct Participant {
     /// Returns the type of controller.
     #[getset(get_copy = "pub")]

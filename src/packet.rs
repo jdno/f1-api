@@ -4,8 +4,9 @@
 //! specification has been slowly evolving from game to game, but without such significant changes
 //! that it would require a different packet format.
 
-use bytes::{Buf, BytesMut};
 use std::io::{Cursor, Error, ErrorKind};
+
+use bytes::{Buf, BytesMut};
 
 pub mod event;
 pub mod header;
@@ -85,9 +86,11 @@ pub(crate) fn ensure_packet_size(
 
 #[cfg(test)]
 mod tests {
-    use crate::packet::ensure_packet_size;
-    use bytes::{Buf, BufMut, BytesMut};
     use std::io::{Cursor, Error};
+
+    use bytes::{Buf, BufMut, BytesMut};
+
+    use crate::packet::ensure_packet_size;
 
     struct Packet {
         counter: u8,

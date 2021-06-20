@@ -3,14 +3,16 @@
 //! F1 2019 extended the event packet with seven new events compared to its predecessor, four of
 //! which can carry a payload.
 
+use std::io::{Cursor, Error, ErrorKind};
+use std::time::Duration;
+
+use bytes::{Buf, BytesMut};
+
 use crate::nineteen::header::decode_header;
 use crate::packet::ensure_packet_size;
 use crate::packet::event::{
     Event, EventPacket, FastestLap, RaceWinner, Retirement, TeammateInPits,
 };
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind};
-use std::time::Duration;
 
 /// Size of the event packet in bytes
 ///
@@ -91,10 +93,12 @@ fn decode_race_winner(cursor: &mut Cursor<&mut BytesMut>) -> Event {
 
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
+    use bytes::{BufMut, BytesMut};
+
     use crate::nineteen::event::{decode_event, PACKET_SIZE};
     use crate::packet::event::Event;
-    use bytes::{BufMut, BytesMut};
-    use std::io::Cursor;
 
     fn put_packet_header(mut bytes: BytesMut) -> BytesMut {
         bytes.put_u16_le(2019);

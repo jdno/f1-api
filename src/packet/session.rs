@@ -3,11 +3,13 @@
 //! The F1 games provide information about the current session, for example weather and temperature
 //! as well as settings like the type of safety car in use.
 
-use crate::packet::header::Header;
-use crate::types::{Flag, VehicleIndex};
+use std::time::Duration;
+
 use derive_new::new;
 use getset::{CopyGetters, Getters};
-use std::time::Duration;
+
+use crate::packet::header::Header;
+use crate::types::{Flag, VehicleIndex};
 
 /// Types of formula racing supported by the F1 games
 ///
