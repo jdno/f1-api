@@ -53,7 +53,7 @@ in the best way possible, and that requires us to fully understand it.
 
 ## How to release a new version
 
-Only members of Hello Bits can cut a new release. The process is largely
+Only maintainers of Nord SDK can cut a new release. The process is largely
 automated to avoid errors and mistakes. These are the steps necessary to create
 a new release and publish it to [crates.io]:
 
@@ -74,7 +74,7 @@ a new release and publish it to [crates.io]:
 1. Push the branch to GitHub, create a pull request, and wait for the checks to
    pass.
 
-1. Go to the [releases](https://github.com/hellobits/f1-api/releases) and create
+1. Go to the [releases](https://github.com/nordsdk/f1-api/releases) and create
    a release for the new version. Copy the relevant section from the [changelog]
    into the release message, and name the release after the version. When saving
    the release, a GitHub action is started that publishes the version to

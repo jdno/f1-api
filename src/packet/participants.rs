@@ -279,8 +279,8 @@ pub enum Nationality {
 
 impl Default for Nationality {
     fn default() -> Self {
-        // Greetings from the home of Hello Bits!
-        Nationality::Dutch
+        // Greetings from the Nürburg!
+        Nationality::German
     }
 }
 
