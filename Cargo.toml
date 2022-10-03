@@ -37,7 +37,7 @@ tokio-util = { version = "0.7.0", features = ["codec", "net"] }
 
 [dev-dependencies]
 assert_approx_eq = "1.1.0"
-clap = "2.33.0"
+clap = "4.0.8"
 
 [package.metadata.release]
 disable-publish = true
